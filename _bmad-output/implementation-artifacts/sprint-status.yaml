@@ -54,9 +54,9 @@ development_status:
   # Members can list their homes with photos, descriptions, and manage availability calendars
   # FRs: FR9-17
   # ==============================================================================
-  epic-2: backlog
-  2-1-create-home-listing-with-basic-info: backlog
-  2-2-upload-multiple-photos-for-listing: backlog
+  epic-2: in-progress
+  2-1-create-home-listing-with-basic-info: done
+  2-2-upload-multiple-photos-for-listing: in-progress
   2-3-edit-and-delete-home-listings: backlog
   2-4-support-multiple-home-listings: backlog
   2-5-manage-availability-calendar: backlog

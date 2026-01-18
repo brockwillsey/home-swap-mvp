@@ -104,17 +104,33 @@ export default async function DashboardPage() {
             </Card>
           </Link>
 
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">My Listings</CardTitle>
-              <CardDescription>Manage your home listings</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-muted-foreground">
-                Coming in Epic 2
-              </p>
-            </CardContent>
-          </Card>
+          {isApproved ? (
+            <Link href="/listings/new" className="block">
+              <Card className="h-full transition-colors hover:border-primary/50">
+                <CardHeader>
+                  <CardTitle className="text-lg">Add Home</CardTitle>
+                  <CardDescription>Share your space with the community</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm text-muted-foreground">
+                    Create a listing for your home
+                  </p>
+                </CardContent>
+              </Card>
+            </Link>
+          ) : (
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg">Add Home</CardTitle>
+                <CardDescription>Share your space with the community</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-muted-foreground">
+                  Available after membership approval
+                </p>
+              </CardContent>
+            </Card>
+          )}
 
           <Card>
             <CardHeader>
