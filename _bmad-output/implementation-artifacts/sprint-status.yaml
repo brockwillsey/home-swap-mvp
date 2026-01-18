@@ -44,7 +44,7 @@ development_status:
   1-4-upload-home-photos-in-application: done
   1-5-process-membership-payment: done
   1-6-create-member-profile-management: done
-  1-7-view-other-member-profiles: backlog
+  1-7-view-other-member-profiles: done
   1-8-display-membership-status: backlog
   1-9-send-application-decision-emails: backlog
   epic-1-retrospective: optional

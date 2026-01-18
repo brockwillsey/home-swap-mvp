@@ -103,6 +103,20 @@ export default async function DashboardPage() {
             </Card>
           </Link>
 
+          <Link href="/members" className="block">
+            <Card className="h-full transition-colors hover:border-primary/50">
+              <CardHeader>
+                <CardTitle className="text-lg">Community Members</CardTitle>
+                <CardDescription>Browse fellow members</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-muted-foreground">
+                  View profiles of other Art Res members
+                </p>
+              </CardContent>
+            </Card>
+          </Link>
+
           <Card>
             <CardHeader>
               <CardTitle className="text-lg">My Listings</CardTitle>

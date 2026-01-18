@@ -6,6 +6,7 @@
  */
 
 import { TRPCError } from "@trpc/server";
+import { z } from "zod";
 
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 import { profileUpdateSchema } from "~/lib/validations/profile";
@@ -166,6 +167,132 @@ export const profileRouter = createTRPCRouter({
           createdAt: updatedUser.createdAt,
           points: updatedUser.points,
         },
+      };
+    }),
+
+  /**
+   * Get another member's public profile by ID
+   *
+   * Only returns approved members' profiles.
+   * Excludes private data like email.
+   */
+  getMemberById: protectedProcedure
+    .input(z.object({ memberId: z.string() }))
+    .query(async ({ ctx, input }) => {
+      // Verify calling user is approved
+      const callingUser = await ctx.db.user.findUnique({
+        where: { id: ctx.session.user.id },
+        include: { application: { select: { status: true } } },
+      });
+
+      if (callingUser?.application?.status !== "APPROVED") {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "Only approved members can view other profiles",
+        });
+      }
+
+      // Get member with application data for fallbacks
+      const member = await ctx.db.user.findUnique({
+        where: { id: input.memberId },
+        include: {
+          application: {
+            select: {
+              status: true,
+              bio: true,
+              location: true,
+              creativeInterests: true,
+              profilePhotoUrl: true,
+            },
+          },
+        },
+      });
+
+      if (!member) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Member not found",
+        });
+      }
+
+      // Only show approved members
+      if (member.application?.status !== "APPROVED") {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Member not found",
+        });
+      }
+
+      // Return public profile data with fallbacks to application data
+      return {
+        id: member.id,
+        name: member.name,
+        image: member.image ?? member.application?.profilePhotoUrl,
+        bio: member.bio ?? member.application?.bio,
+        location: member.location ?? member.application?.location,
+        creativeInterests: member.creativeInterests ?? member.application?.creativeInterests,
+        createdAt: member.createdAt,
+        // Home listings will be added in Epic 2
+        homes: [],
+      };
+    }),
+
+  /**
+   * List all approved members
+   *
+   * Returns a paginated list of approved members for the directory.
+   */
+  listMembers: protectedProcedure
+    .input(
+      z.object({
+        limit: z.number().min(1).max(50).default(20),
+        cursor: z.string().optional(),
+      })
+    )
+    .query(async ({ ctx, input }) => {
+      // Verify calling user is approved
+      const callingUser = await ctx.db.user.findUnique({
+        where: { id: ctx.session.user.id },
+        include: { application: { select: { status: true } } },
+      });
+
+      if (callingUser?.application?.status !== "APPROVED") {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "Only approved members can view the member directory",
+        });
+      }
+
+      const { limit, cursor } = input;
+
+      // Get approved members
+      const members = await ctx.db.user.findMany({
+        where: {
+          application: {
+            status: "APPROVED",
+          },
+        },
+        select: {
+          id: true,
+          name: true,
+          image: true,
+          location: true,
+          createdAt: true,
+        },
+        take: limit + 1,
+        cursor: cursor ? { id: cursor } : undefined,
+        orderBy: { createdAt: "desc" },
+      });
+
+      let nextCursor: string | undefined;
+      if (members.length > limit) {
+        const nextItem = members.pop();
+        nextCursor = nextItem?.id;
+      }
+
+      return {
+        members,
+        nextCursor,
       };
     }),
 });

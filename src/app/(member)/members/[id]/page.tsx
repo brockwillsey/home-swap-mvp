@@ -1,6 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
-import { redirect } from "next/navigation";
+import { redirect, notFound } from "next/navigation";
 
 import { auth } from "~/server/auth";
 import { db } from "~/server/db";
@@ -8,23 +8,42 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/com
 import { Button } from "~/components/ui/button";
 import { MemberHeader } from "~/components/layout/MemberHeader";
 
+interface MemberProfilePageProps {
+  params: Promise<{ id: string }>;
+}
+
 /**
- * Profile View Page
+ * Member Profile Page
  *
- * Displays the current member's profile information.
- * Only accessible to approved members.
+ * Displays another member's public profile information.
+ * Only accessible to authenticated, approved members.
  */
-export default async function ProfilePage() {
+export default async function MemberProfilePage({ params }: MemberProfilePageProps) {
+  const { id: memberId } = await params;
   const session = await auth();
 
   // Redirect to sign in if not authenticated
   if (!session?.user) {
-    redirect("/auth/signin?callbackUrl=/profile");
+    redirect(`/auth/signin?callbackUrl=/members/${memberId}`);
   }
 
-  // Get user with application data
-  const user = await db.user.findUnique({
+  // Verify the viewing user is approved
+  const viewingUser = await db.user.findUnique({
     where: { id: session.user.id },
+    include: {
+      application: {
+        select: { status: true },
+      },
+    },
+  });
+
+  if (!viewingUser || viewingUser.application?.status !== "APPROVED") {
+    redirect("/dashboard");
+  }
+
+  // Get the member being viewed
+  const member = await db.user.findUnique({
+    where: { id: memberId },
     include: {
       application: {
         select: {
@@ -38,35 +57,19 @@ export default async function ProfilePage() {
     },
   });
 
-  if (!user) {
-    redirect("/auth/signin");
+  // Member not found or not approved
+  if (!member || member.application?.status !== "APPROVED") {
+    notFound();
   }
 
-  // Check if user is approved
-  const isApproved = user.application?.status === "APPROVED";
-
-  // Redirect non-approved users
-  if (!isApproved) {
-    // If they have an application, go to dashboard to see status
-    if (user.application) {
-      redirect("/dashboard");
-    }
-    // Otherwise, they need to apply
-    redirect("/apply");
-  }
-
-  // Build profile data, falling back to application data if user fields are empty
-  // Note: Actual sync to User table happens in the profile.getProfile tRPC procedure
-  // or when user saves their profile. Here we just display the best available data.
+  // Build profile data with fallbacks to application
   const profileData = {
-    name: user.name,
-    email: user.email,
-    image: user.image ?? user.application?.profilePhotoUrl,
-    bio: user.bio ?? user.application?.bio,
-    location: user.location ?? user.application?.location,
-    creativeInterests: user.creativeInterests ?? user.application?.creativeInterests,
-    createdAt: user.createdAt,
-    points: user.points,
+    name: member.name,
+    image: member.image ?? member.application?.profilePhotoUrl,
+    bio: member.bio ?? member.application?.bio,
+    location: member.location ?? member.application?.location,
+    creativeInterests: member.creativeInterests ?? member.application?.creativeInterests,
+    createdAt: member.createdAt,
   };
 
   const memberSince = profileData.createdAt.toLocaleDateString("en-US", {
@@ -74,22 +77,31 @@ export default async function ProfilePage() {
     month: "long",
   });
 
+  // Check if viewing own profile
+  const isOwnProfile = session.user.id === memberId;
+
   return (
     <main className="min-h-screen bg-background">
-      <MemberHeader activePage="profile" />
+      <MemberHeader activePage="members" />
 
       {/* Main Content */}
       <div className="container mx-auto px-4 py-8">
         <div className="mb-8 flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-foreground">My Profile</h1>
+            <h1 className="text-3xl font-bold text-foreground">
+              {isOwnProfile ? "My Profile" : "Member Profile"}
+            </h1>
             <p className="mt-2 text-muted-foreground">
-              View and manage your profile information
+              {isOwnProfile
+                ? "View your profile information"
+                : `Learn more about ${profileData.name ?? "this member"}`}
             </p>
           </div>
-          <Button asChild>
-            <Link href="/profile/edit">Edit Profile</Link>
-          </Button>
+          {isOwnProfile && (
+            <Button asChild>
+              <Link href="/profile/edit">Edit Profile</Link>
+            </Button>
+          )}
         </div>
 
         <div className="grid gap-6 lg:grid-cols-3">
@@ -130,13 +142,6 @@ export default async function ProfilePage() {
                 <p className="mt-2 text-xs text-muted-foreground">
                   Member since {memberSince}
                 </p>
-
-                {/* Points */}
-                <div className="mt-4 rounded-lg bg-primary/10 px-4 py-2">
-                  <p className="text-sm font-medium text-primary">
-                    {profileData.points} points
-                  </p>
-                </div>
               </div>
             </CardContent>
           </Card>
@@ -145,7 +150,9 @@ export default async function ProfilePage() {
           <Card className="lg:col-span-2">
             <CardHeader>
               <CardTitle>About</CardTitle>
-              <CardDescription>Your profile information</CardDescription>
+              <CardDescription>
+                {isOwnProfile ? "Your profile information" : "Member information"}
+              </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
               {/* Bio */}
@@ -175,22 +182,38 @@ export default async function ProfilePage() {
                   )}
                 </p>
               </div>
+            </CardContent>
+          </Card>
 
-              {/* Email */}
-              <div>
-                <h3 className="mb-2 text-sm font-medium text-muted-foreground">
-                  Email
-                </h3>
-                <p className="text-foreground">{profileData.email}</p>
+          {/* Listed Homes (Placeholder for Epic 2) */}
+          <Card className="lg:col-span-3">
+            <CardHeader>
+              <CardTitle>Listed Homes</CardTitle>
+              <CardDescription>
+                {isOwnProfile
+                  ? "Your homes available for exchange"
+                  : `${profileData.name ?? "This member"}'s homes available for exchange`}
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="flex flex-col items-center justify-center py-8 text-center">
+                <p className="text-muted-foreground">
+                  No homes listed yet
+                </p>
+                {isOwnProfile && (
+                  <p className="mt-2 text-sm text-muted-foreground">
+                    Home listings will be available in a future update
+                  </p>
+                )}
               </div>
             </CardContent>
           </Card>
         </div>
 
-        {/* Edit CTA for mobile */}
-        <div className="mt-6 lg:hidden">
-          <Button asChild className="w-full">
-            <Link href="/profile/edit">Edit Profile</Link>
+        {/* Back to Members Link */}
+        <div className="mt-6">
+          <Button variant="outline" asChild>
+            <Link href="/members">Back to Members</Link>
           </Button>
         </div>
       </div>
