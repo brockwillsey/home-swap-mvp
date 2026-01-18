@@ -2,8 +2,10 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 
 import { auth } from "~/server/auth";
+import { db } from "~/server/db";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/components/ui/card";
-import { SignOutButton } from "~/components/auth/SignOutButton";
+import { MemberHeader } from "~/components/layout/MemberHeader";
+import { MembershipStatus, RenewalReminderBanner } from "~/components/membership/MembershipStatus";
 
 /**
  * Dashboard Page (Placeholder)
@@ -21,33 +23,38 @@ export default async function DashboardPage() {
     redirect("/auth/signin?callbackUrl=/dashboard");
   }
 
-  // Verify session contains required fields (per AC #2)
-  const userId = session.user.id;
-  // Default to MEMBER role for users without explicit role assignment
-  // This is expected for new users - ADMIN role is explicitly set by admins
-  const userRole = session.user.role ?? "MEMBER";
-  const userEmail = session.user.email;
-  const userName = session.user.name;
+  // Get user with application data for membership status
+  const user = await db.user.findUnique({
+    where: { id: session.user.id },
+    include: {
+      application: {
+        select: {
+          status: true,
+          reviewedAt: true,
+        },
+      },
+    },
+  });
+
+  const userName = session.user.name ?? user?.name;
+
+  // Get membership start date (when application was approved)
+  const membershipStartDate = user?.application?.reviewedAt ?? null;
+  const isApproved = user?.application?.status === "APPROVED";
 
   return (
     <main className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="border-b bg-card">
-        <div className="container mx-auto flex items-center justify-between px-4 py-4">
-          <Link href="/" className="text-2xl font-bold text-primary">
-            Art Res
-          </Link>
-          <div className="flex items-center gap-4">
-            <span className="text-sm text-muted-foreground">
-              {userName ?? userEmail}
-            </span>
-            <SignOutButton />
-          </div>
-        </div>
-      </header>
+      <MemberHeader activePage="dashboard" userName={userName} />
 
       {/* Main Content */}
       <div className="container mx-auto px-4 py-8">
+        {/* Renewal Reminder Banner (shows if expiring/expired) */}
+        {isApproved && (
+          <div className="mb-6">
+            <RenewalReminderBanner membershipStartDate={membershipStartDate} />
+          </div>
+        )}
+
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-foreground">
             Welcome back{userName ? `, ${userName}` : ""}!
@@ -57,35 +64,15 @@ export default async function DashboardPage() {
           </p>
         </div>
 
-        {/* Session info card - for verification */}
-        <Card className="mb-8">
-          <CardHeader>
-            <CardTitle>Session Information</CardTitle>
-            <CardDescription>
-              Your authenticated session details (AC #2 verification)
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <dl className="space-y-2 text-sm">
-              <div className="flex gap-2">
-                <dt className="font-medium text-muted-foreground">User ID:</dt>
-                <dd className="font-mono text-xs">{userId}</dd>
-              </div>
-              <div className="flex gap-2">
-                <dt className="font-medium text-muted-foreground">Email:</dt>
-                <dd>{userEmail}</dd>
-              </div>
-              <div className="flex gap-2">
-                <dt className="font-medium text-muted-foreground">Role:</dt>
-                <dd>
-                  <span className="inline-flex items-center rounded-full bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">
-                    {userRole}
-                  </span>
-                </dd>
-              </div>
-            </dl>
-          </CardContent>
-        </Card>
+        {/* Membership Status Card */}
+        {isApproved && (
+          <div className="mb-8">
+            <MembershipStatus
+              membershipStartDate={membershipStartDate}
+              showRenewalReminder
+            />
+          </div>
+        )}
 
         {/* Feature cards */}
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">

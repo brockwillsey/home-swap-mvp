@@ -7,6 +7,7 @@ import { db } from "~/server/db";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/components/ui/card";
 import { Button } from "~/components/ui/button";
 import { MemberHeader } from "~/components/layout/MemberHeader";
+import { MembershipStatus } from "~/components/membership/MembershipStatus";
 
 /**
  * Profile View Page
@@ -33,6 +34,7 @@ export default async function ProfilePage() {
           location: true,
           creativeInterests: true,
           profilePhotoUrl: true,
+          reviewedAt: true,
         },
       },
     },
@@ -94,52 +96,59 @@ export default async function ProfilePage() {
 
         <div className="grid gap-6 lg:grid-cols-3">
           {/* Profile Photo & Basic Info */}
-          <Card className="lg:col-span-1">
-            <CardContent className="pt-6">
-              <div className="flex flex-col items-center text-center">
-                {/* Profile Photo */}
-                <div className="relative mb-4 h-32 w-32 overflow-hidden rounded-full bg-muted">
-                  {profileData.image ? (
-                    <Image
-                      src={profileData.image}
-                      alt={profileData.name ?? "Profile photo"}
-                      fill
-                      sizes="128px"
-                      className="object-cover"
-                    />
-                  ) : (
-                    <div className="flex h-full w-full items-center justify-center text-4xl text-muted-foreground">
-                      {profileData.name?.charAt(0)?.toUpperCase() ?? "?"}
-                    </div>
+          <div className="space-y-6 lg:col-span-1">
+            <Card>
+              <CardContent className="pt-6">
+                <div className="flex flex-col items-center text-center">
+                  {/* Profile Photo */}
+                  <div className="relative mb-4 h-32 w-32 overflow-hidden rounded-full bg-muted">
+                    {profileData.image ? (
+                      <Image
+                        src={profileData.image}
+                        alt={profileData.name ?? "Profile photo"}
+                        fill
+                        sizes="128px"
+                        className="object-cover"
+                      />
+                    ) : (
+                      <div className="flex h-full w-full items-center justify-center text-4xl text-muted-foreground">
+                        {profileData.name?.charAt(0)?.toUpperCase() ?? "?"}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Name */}
+                  <h2 className="text-xl font-semibold text-foreground">
+                    {profileData.name ?? "No name set"}
+                  </h2>
+
+                  {/* Location */}
+                  {profileData.location && (
+                    <p className="mt-1 text-sm text-muted-foreground">
+                      {profileData.location}
+                    </p>
                   )}
-                </div>
 
-                {/* Name */}
-                <h2 className="text-xl font-semibold text-foreground">
-                  {profileData.name ?? "No name set"}
-                </h2>
-
-                {/* Location */}
-                {profileData.location && (
-                  <p className="mt-1 text-sm text-muted-foreground">
-                    {profileData.location}
+                  {/* Member Since */}
+                  <p className="mt-2 text-xs text-muted-foreground">
+                    Member since {memberSince}
                   </p>
-                )}
 
-                {/* Member Since */}
-                <p className="mt-2 text-xs text-muted-foreground">
-                  Member since {memberSince}
-                </p>
-
-                {/* Points */}
-                <div className="mt-4 rounded-lg bg-primary/10 px-4 py-2">
-                  <p className="text-sm font-medium text-primary">
-                    {profileData.points} points
-                  </p>
+                  {/* Points */}
+                  <div className="mt-4 rounded-lg bg-primary/10 px-4 py-2">
+                    <p className="text-sm font-medium text-primary">
+                      {profileData.points} points
+                    </p>
+                  </div>
                 </div>
-              </div>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+
+            {/* Membership Status */}
+            <MembershipStatus
+              membershipStartDate={user.application?.reviewedAt ?? null}
+            />
+          </div>
 
           {/* Bio & Creative Interests */}
           <Card className="lg:col-span-2">
