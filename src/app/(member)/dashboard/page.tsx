@@ -87,8 +87,22 @@ export default async function DashboardPage() {
           </CardContent>
         </Card>
 
-        {/* Placeholder cards for future features */}
+        {/* Feature cards */}
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          <Link href="/profile" className="block">
+            <Card className="h-full transition-colors hover:border-primary/50">
+              <CardHeader>
+                <CardTitle className="text-lg">My Profile</CardTitle>
+                <CardDescription>View and edit your profile</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-muted-foreground">
+                  Update your bio, photo, and creative interests
+                </p>
+              </CardContent>
+            </Card>
+          </Link>
+
           <Card>
             <CardHeader>
               <CardTitle className="text-lg">My Listings</CardTitle>
