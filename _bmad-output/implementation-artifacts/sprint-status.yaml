@@ -37,7 +37,7 @@ development_status:
   # Members can join the Art Res community, complete their profile, and establish trusted identity
   # FRs: FR1-8 + Architecture (T3 Stack setup)
   # ==============================================================================
-  epic-1: in-progress
+  epic-1: done
   1-1-initialize-project-foundation: done
   1-2-implement-magic-link-authentication: done
   1-3-build-member-application-form: done
@@ -46,7 +46,7 @@ development_status:
   1-6-create-member-profile-management: done
   1-7-view-other-member-profiles: done
   1-8-display-membership-status: done
-  1-9-send-application-decision-emails: backlog
+  1-9-send-application-decision-emails: done
   epic-1-retrospective: optional
 
   # ==============================================================================

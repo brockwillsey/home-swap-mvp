@@ -13,6 +13,27 @@ import { z } from "zod";
 import { createTRPCRouter, publicProcedure, rateLimitedProcedure, adminProcedure } from "~/server/api/trpc";
 import { applicationFormSchema } from "~/lib/validations/application";
 import { createRefund } from "~/lib/services/stripe";
+import {
+  sendWelcomeEmail,
+  sendRejectionEmail,
+  sendInfoRequestEmail,
+} from "~/lib/services/resend";
+
+/**
+ * Get and validate the base URL for email links
+ * Warns if NEXTAUTH_URL is not set (would cause broken links in production)
+ */
+function getBaseUrl(): string {
+  const baseUrl = process.env.NEXTAUTH_URL;
+  if (!baseUrl) {
+    console.warn(
+      "NEXTAUTH_URL is not set - email links will use localhost. " +
+      "This MUST be configured in production!"
+    );
+    return "http://localhost:3000";
+  }
+  return baseUrl;
+}
 
 export const applicationRouter = createTRPCRouter({
   /**
@@ -240,12 +261,283 @@ export const applicationRouter = createTRPCRouter({
         },
       });
 
-      // TODO: Send rejection email (Story 1.9)
+      // Send rejection email (Story 1.9)
+      let emailSent = false;
+      try {
+        await sendRejectionEmail({
+          email: application.user.email,
+          name: application.user.name ?? "Applicant",
+          feedback: feedback.trim(),
+          refundProcessed: refundResult?.success ?? false,
+        });
+        emailSent = true;
+      } catch (emailError) {
+        // Log email error but don't fail the rejection
+        console.error("Failed to send rejection email:", emailError);
+      }
 
       return {
         success: true,
+        emailSent,
         refundProcessed: refundResult?.success ?? false,
         refundError: refundResult?.error,
+      };
+    }),
+
+  /**
+   * Admin: Approve an application
+   *
+   * Approves the application and sends a welcome email to the new member.
+   * Only accessible to admins.
+   */
+  approve: adminProcedure
+    .input(
+      z.object({
+        applicationId: z.string().min(1, "Application ID is required"),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      const { applicationId } = input;
+
+      // Get the application
+      const application = await ctx.db.application.findUnique({
+        where: { id: applicationId },
+        include: {
+          user: {
+            select: { id: true, email: true, name: true },
+          },
+        },
+      });
+
+      if (!application) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Application not found",
+        });
+      }
+
+      // Can only approve SUBMITTED applications (paid ones)
+      if (application.status !== "SUBMITTED") {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: `Cannot approve application with status: ${application.status}`,
+        });
+      }
+
+      // Update application status and sync profile data to user
+      await ctx.db.$transaction([
+        ctx.db.application.update({
+          where: { id: applicationId },
+          data: {
+            status: "APPROVED",
+            reviewedAt: new Date(),
+            reviewedBy: ctx.session.user.id,
+          },
+        }),
+        // Sync application profile data to user record
+        ctx.db.user.update({
+          where: { id: application.user.id },
+          data: {
+            bio: application.bio,
+            location: application.location,
+            creativeInterests: application.creativeInterests,
+            image: application.profilePhotoUrl,
+          },
+        }),
+      ]);
+
+      // Send welcome email (Story 1.9)
+      const loginUrl = `${getBaseUrl()}/auth/signin`;
+
+      let emailSent = false;
+      try {
+        await sendWelcomeEmail({
+          email: application.user.email,
+          name: application.user.name ?? "New Member",
+          loginUrl,
+        });
+        emailSent = true;
+      } catch (emailError) {
+        // Log email error but don't fail the approval
+        console.error("Failed to send welcome email:", emailError);
+      }
+
+      return {
+        success: true,
+        emailSent,
+      };
+    }),
+
+  /**
+   * Admin: Request more information from applicant
+   *
+   * Sets application to NEEDS_INFO status and sends email asking for specific info.
+   * Only accessible to admins.
+   */
+  requestMoreInfo: adminProcedure
+    .input(
+      z.object({
+        applicationId: z.string().min(1, "Application ID is required"),
+        requestedInfo: z.string().min(10, "Please specify what information is needed (minimum 10 characters)").max(1000),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      const { applicationId, requestedInfo } = input;
+
+      // Get the application
+      const application = await ctx.db.application.findUnique({
+        where: { id: applicationId },
+        include: {
+          user: {
+            select: { email: true, name: true },
+          },
+        },
+      });
+
+      if (!application) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Application not found",
+        });
+      }
+
+      // Can only request info from SUBMITTED applications
+      if (application.status !== "SUBMITTED") {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: `Cannot request info for application with status: ${application.status}`,
+        });
+      }
+
+      // Update application status
+      await ctx.db.application.update({
+        where: { id: applicationId },
+        data: {
+          status: "NEEDS_INFO",
+          feedback: requestedInfo.trim(), // Store the request in feedback field
+          reviewedAt: new Date(),
+          reviewedBy: ctx.session.user.id,
+        },
+      });
+
+      // Send info request email (Story 1.9)
+      const updateUrl = `${getBaseUrl()}/apply`; // User can reapply/update at /apply
+
+      let emailSent = false;
+      try {
+        await sendInfoRequestEmail({
+          email: application.user.email,
+          name: application.user.name ?? "Applicant",
+          requestedInfo: requestedInfo.trim(),
+          updateUrl,
+        });
+        emailSent = true;
+      } catch (emailError) {
+        // Log email error but don't fail the request
+        console.error("Failed to send info request email:", emailError);
+      }
+
+      return {
+        success: true,
+        emailSent,
+      };
+    }),
+
+  /**
+   * Admin: List pending applications
+   *
+   * Returns applications sorted by submission date (oldest first).
+   * Only accessible to admins.
+   */
+  listPending: adminProcedure
+    .input(
+      z.object({
+        status: z.enum(["PENDING", "SUBMITTED", "NEEDS_INFO"]).optional(),
+        limit: z.number().min(1).max(100).default(50),
+      }).optional()
+    )
+    .query(async ({ ctx, input }) => {
+      const status = input?.status ?? "SUBMITTED";
+      const limit = input?.limit ?? 50;
+
+      const applications = await ctx.db.application.findMany({
+        where: { status },
+        include: {
+          user: {
+            select: {
+              id: true,
+              email: true,
+              name: true,
+            },
+          },
+        },
+        orderBy: { createdAt: "asc" }, // Oldest first
+        take: limit,
+      });
+
+      return applications.map((app) => ({
+        id: app.id,
+        userId: app.user.id,
+        email: app.user.email,
+        name: app.user.name,
+        profilePhotoUrl: app.profilePhotoUrl,
+        location: app.location,
+        status: app.status,
+        createdAt: app.createdAt,
+        feedback: app.feedback,
+      }));
+    }),
+
+  /**
+   * Admin: Get full application details
+   *
+   * Returns complete application data for admin review.
+   * Only accessible to admins.
+   */
+  getDetails: adminProcedure
+    .input(
+      z.object({
+        applicationId: z.string().min(1, "Application ID is required"),
+      })
+    )
+    .query(async ({ ctx, input }) => {
+      const application = await ctx.db.application.findUnique({
+        where: { id: input.applicationId },
+        include: {
+          user: {
+            select: {
+              id: true,
+              email: true,
+              name: true,
+              createdAt: true,
+            },
+          },
+        },
+      });
+
+      if (!application) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Application not found",
+        });
+      }
+
+      return {
+        id: application.id,
+        user: application.user,
+        status: application.status,
+        bio: application.bio,
+        location: application.location,
+        creativeInterests: application.creativeInterests,
+        reasonForJoining: application.reasonForJoining,
+        profilePhotoUrl: application.profilePhotoUrl,
+        homePhotos: application.homePhotos,
+        feedback: application.feedback,
+        stripePaymentId: application.stripePaymentId,
+        createdAt: application.createdAt,
+        updatedAt: application.updatedAt,
+        reviewedAt: application.reviewedAt,
+        reviewedBy: application.reviewedBy,
       };
     }),
 });
