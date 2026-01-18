@@ -1,0 +1,73 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id           String        @id @default(uuid())
+  email        String        @unique
+  name         String?
+  points       Int           @default(0)
+  createdAt    DateTime      @default(now())
+  homes        Home[]
+  memberships  Membership[]
+  reservations Reservation[]
+}
+
+model Membership {
+  id        String           @id @default(uuid())
+  userId    String
+  status    MembershipStatus @default(ACTIVE)
+  startDate DateTime         @default(now())
+  endDate   DateTime?
+  user      User             @relation(fields: [userId], references: [id])
+}
+
+model Home {
+  id           String         @id @default(uuid())
+  ownerId      String
+  title        String
+  description  String?
+  location     String
+  createdAt    DateTime       @default(now())
+  availability Availability[]
+  owner        User           @relation(fields: [ownerId], references: [id])
+  reservations Reservation[]
+}
+
+model Availability {
+  id        String   @id @default(uuid())
+  homeId    String
+  startDate DateTime
+  endDate   DateTime
+  home      Home     @relation(fields: [homeId], references: [id])
+}
+
+model Reservation {
+  id        String            @id @default(uuid())
+  userId    String
+  homeId    String
+  startDate DateTime
+  endDate   DateTime
+  status    ReservationStatus @default(PENDING)
+  points    Int?
+  createdAt DateTime          @default(now())
+  home      Home              @relation(fields: [homeId], references: [id])
+  user      User              @relation(fields: [userId], references: [id])
+}
+
+enum MembershipStatus {
+  ACTIVE
+  PAUSED
+  CANCELED
+}
+
+enum ReservationStatus {
+  PENDING
+  CONFIRMED
+  CANCELED
+  COMPLETED
+}
