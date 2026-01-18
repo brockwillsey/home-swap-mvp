@@ -6,6 +6,7 @@ import { db } from "~/server/db";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/components/ui/card";
 import { MemberHeader } from "~/components/layout/MemberHeader";
 import { MembershipStatus, RenewalReminderBanner } from "~/components/membership/MembershipStatus";
+import { PointsBalanceDisplay } from "~/components/points/PointsBalanceDisplay";
 
 /**
  * Dashboard Page (Placeholder)
@@ -36,15 +37,22 @@ export default async function DashboardPage() {
     },
   });
 
+  const userPoints = user?.points ?? 0;
+
   const userName = session.user.name ?? user?.name;
 
   // Get membership start date (when application was approved)
   const membershipStartDate = user?.application?.reviewedAt ?? null;
   const isApproved = user?.application?.status === "APPROVED";
 
+  // Get listing count for approved users
+  const listingCount = isApproved
+    ? await db.home.count({ where: { ownerId: session.user.id } })
+    : 0;
+
   return (
     <main className="min-h-screen bg-background">
-      <MemberHeader activePage="dashboard" userName={userName} />
+      <MemberHeader activePage="dashboard" userName={userName} userPoints={userPoints} />
 
       {/* Main Content */}
       <div className="container mx-auto px-4 py-8">
@@ -64,9 +72,10 @@ export default async function DashboardPage() {
           </p>
         </div>
 
-        {/* Membership Status Card */}
+        {/* Points and Membership Status */}
         {isApproved && (
-          <div className="mb-8">
+          <div className="mb-8 grid gap-6 md:grid-cols-2">
+            <PointsBalanceDisplay points={userPoints} />
             <MembershipStatus
               membershipStartDate={membershipStartDate}
               showRenewalReminder
@@ -105,15 +114,21 @@ export default async function DashboardPage() {
           </Link>
 
           {isApproved ? (
-            <Link href="/listings/new" className="block">
+            <Link href="/listings" className="block">
               <Card className="h-full transition-colors hover:border-primary/50">
                 <CardHeader>
-                  <CardTitle className="text-lg">Add Home</CardTitle>
-                  <CardDescription>Share your space with the community</CardDescription>
+                  <CardTitle className="text-lg">My Listings</CardTitle>
+                  <CardDescription>
+                    {listingCount === 0
+                      ? "Share your space with the community"
+                      : `${listingCount} home${listingCount !== 1 ? "s" : ""} listed`}
+                  </CardDescription>
                 </CardHeader>
                 <CardContent>
                   <p className="text-sm text-muted-foreground">
-                    Create a listing for your home
+                    {listingCount === 0
+                      ? "Add your first home"
+                      : "Manage your listings"}
                   </p>
                 </CardContent>
               </Card>
@@ -121,7 +136,7 @@ export default async function DashboardPage() {
           ) : (
             <Card>
               <CardHeader>
-                <CardTitle className="text-lg">Add Home</CardTitle>
+                <CardTitle className="text-lg">My Listings</CardTitle>
                 <CardDescription>Share your space with the community</CardDescription>
               </CardHeader>
               <CardContent>
@@ -132,29 +147,33 @@ export default async function DashboardPage() {
             </Card>
           )}
 
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">My Bookings</CardTitle>
-              <CardDescription>View your reservations</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-muted-foreground">
-                Coming in Epic 4
-              </p>
-            </CardContent>
-          </Card>
+          <Link href="/trips" className="block">
+            <Card className="h-full transition-colors hover:border-primary/50">
+              <CardHeader>
+                <CardTitle className="text-lg">My Trips</CardTitle>
+                <CardDescription>View your stays and hosting</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-muted-foreground">
+                  Manage your bookings and guest requests
+                </p>
+              </CardContent>
+            </Card>
+          </Link>
 
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">Messages</CardTitle>
-              <CardDescription>Chat with other members</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-muted-foreground">
-                Coming in Epic 6
-              </p>
-            </CardContent>
-          </Card>
+          <Link href="/messages" className="block">
+            <Card className="h-full transition-colors hover:border-primary/50">
+              <CardHeader>
+                <CardTitle className="text-lg">Messages</CardTitle>
+                <CardDescription>Chat with other members</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-muted-foreground">
+                  Send messages and coordinate with hosts
+                </p>
+              </CardContent>
+            </Card>
+          </Link>
         </div>
       </div>
     </main>

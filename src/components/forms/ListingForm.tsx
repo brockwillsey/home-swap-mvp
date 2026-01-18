@@ -22,31 +22,51 @@ import {
 import { createListingSchema, type CreateListingInput } from "~/lib/validations/listing";
 import { api } from "~/trpc/react";
 
+interface ListingFormProps {
+  mode?: "create" | "edit";
+  listing?: {
+    id: string;
+    title: string;
+    description: string;
+    location: string;
+  };
+}
+
 /**
  * Listing Form Component
  *
- * Form for creating a new home listing.
+ * Form for creating or editing a home listing.
  * Uses React Hook Form + Zod validation.
  * Submits via tRPC mutation.
  */
-export function ListingForm() {
+export function ListingForm({ mode = "create", listing }: ListingFormProps) {
   const router = useRouter();
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const isEditMode = mode === "edit" && listing;
 
   const form = useForm<CreateListingInput>({
     resolver: zodResolver(createListingSchema),
     defaultValues: {
-      title: "",
-      description: "",
-      location: "",
+      title: listing?.title ?? "",
+      description: listing?.description ?? "",
+      location: listing?.location ?? "",
     },
   });
 
   const createListing = api.listing.create.useMutation({
     onSuccess: (data) => {
       toast.success("Listing created! Now add some photos.");
-      // Redirect to photos step (placeholder for Story 2.2)
       router.push(`/listings/${data.id}/photos`);
+    },
+    onError: (error) => {
+      setSubmitError(error.message);
+    },
+  });
+
+  const updateListing = api.listing.update.useMutation({
+    onSuccess: () => {
+      toast.success("Listing updated successfully.");
+      router.push(`/listings/${listing?.id}/photos`);
     },
     onError: (error) => {
       setSubmitError(error.message);
@@ -55,10 +75,14 @@ export function ListingForm() {
 
   async function onSubmit(data: CreateListingInput) {
     setSubmitError(null);
-    createListing.mutate(data);
+    if (isEditMode) {
+      updateListing.mutate({ id: listing.id, ...data });
+    } else {
+      createListing.mutate(data);
+    }
   }
 
-  const isSubmitting = createListing.isPending;
+  const isSubmitting = createListing.isPending || updateListing.isPending;
   const titleLength = form.watch("title")?.length ?? 0;
   const descriptionLength = form.watch("description")?.length ?? 0;
   const locationLength = form.watch("location")?.length ?? 0;
@@ -68,9 +92,11 @@ export function ListingForm() {
       {/* Form Card */}
       <Card className="w-full max-w-2xl">
         <CardHeader>
-          <CardTitle>Add Your Home</CardTitle>
+          <CardTitle>{isEditMode ? "Edit Your Home" : "Add Your Home"}</CardTitle>
           <CardDescription>
-            Tell us about your home. You&apos;ll add photos in the next step.
+            {isEditMode
+              ? "Update your listing details below."
+              : "Tell us about your home. You'll add photos in the next step."}
           </CardDescription>
         </CardHeader>
 
@@ -171,7 +197,13 @@ export function ListingForm() {
                   Cancel
                 </Button>
                 <Button type="submit" disabled={isSubmitting}>
-                  {isSubmitting ? "Creating..." : "Continue to Photos"}
+                  {isSubmitting
+                    ? isEditMode
+                      ? "Saving..."
+                      : "Creating..."
+                    : isEditMode
+                      ? "Save Changes"
+                      : "Continue to Photos"}
                 </Button>
               </div>
             </form>
@@ -190,7 +222,9 @@ export function ListingForm() {
         <CardContent>
           <div className="rounded-lg border bg-card p-4">
             <div className="mb-3 aspect-video w-full rounded-lg bg-muted flex items-center justify-center">
-              <span className="text-sm text-muted-foreground">Photos coming next</span>
+              <span className="text-sm text-muted-foreground">
+                {isEditMode ? "Photos on next screen" : "Photos coming next"}
+              </span>
             </div>
             <h3 className="font-semibold text-foreground">
               {form.watch("title") || "Your listing title"}

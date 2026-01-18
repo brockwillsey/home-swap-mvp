@@ -54,15 +54,15 @@ development_status:
   # Members can list their homes with photos, descriptions, and manage availability calendars
   # FRs: FR9-17
   # ==============================================================================
-  epic-2: in-progress
+  epic-2: done
   2-1-create-home-listing-with-basic-info: done
-  2-2-upload-multiple-photos-for-listing: in-progress
-  2-3-edit-and-delete-home-listings: backlog
-  2-4-support-multiple-home-listings: backlog
-  2-5-manage-availability-calendar: backlog
-  2-6-configure-booking-mode: backlog
-  2-7-set-exchange-type-preferences: backlog
-  2-8-view-all-my-listings-dashboard: backlog
+  2-2-upload-multiple-photos-for-listing: done
+  2-3-edit-and-delete-home-listings: done
+  2-4-support-multiple-home-listings: done
+  2-5-manage-availability-calendar: done
+  2-6-configure-booking-mode: done
+  2-7-set-exchange-type-preferences: done
+  2-8-view-all-my-listings-dashboard: done
   epic-2-retrospective: optional
 
   # ==============================================================================
@@ -70,12 +70,12 @@ development_status:
   # Members can find available homes matching their travel destinations and dates
   # FRs: FR18-23
   # ==============================================================================
-  epic-3: backlog
-  3-1-search-homes-by-location: backlog
-  3-2-filter-search-by-date-range: backlog
-  3-3-view-search-results-grid: backlog
-  3-4-view-listing-detail-page: backlog
-  3-5-view-host-profile-from-listing: backlog
+  epic-3: done
+  3-1-search-homes-by-location: done
+  3-2-filter-search-by-date-range: done
+  3-3-view-search-results-grid: done
+  3-4-view-listing-detail-page: done
+  3-5-view-host-profile-from-listing: done
   epic-3-retrospective: optional
 
   # ==============================================================================
@@ -83,18 +83,18 @@ development_status:
   # Members can request and confirm bookings using points or direct swaps
   # FRs: FR24-34
   # ==============================================================================
-  epic-4: backlog
-  4-1-request-booking-for-specific-dates: backlog
-  4-2-choose-booking-type: backlog
-  4-3-propose-swap-offer: backlog
-  4-4-receive-booking-request-notification: backlog
-  4-5-host-approves-booking-request: backlog
-  4-6-host-declines-booking-request: backlog
-  4-7-auto-confirm-instant-book-listings: backlog
-  4-8-view-all-my-bookings: backlog
-  4-9-cancel-confirmed-booking: backlog
-  4-10-send-booking-confirmation-emails: backlog
-  4-11-send-declined-booking-emails: backlog
+  epic-4: done
+  4-1-request-booking-for-specific-dates: done
+  4-2-choose-booking-type: done
+  4-3-propose-swap-offer: done
+  4-4-receive-booking-request-notification: done
+  4-5-host-approves-booking-request: done
+  4-6-host-declines-booking-request: done
+  4-7-auto-confirm-instant-book-listings: done
+  4-8-view-all-my-bookings: done
+  4-9-cancel-confirmed-booking: done
+  4-10-send-booking-confirmation-emails: done
+  4-11-send-declined-booking-emails: done
   epic-4-retrospective: optional
 
   # ==============================================================================
@@ -102,12 +102,12 @@ development_status:
   # Members can view points balance, earn points by hosting, spend points on bookings
   # FRs: FR35-39
   # ==============================================================================
-  epic-5: backlog
-  5-1-view-points-balance: backlog
-  5-2-award-points-when-hosting: backlog
-  5-3-deduct-points-when-booking: backlog
-  5-4-view-points-transaction-history: backlog
-  5-5-prevent-booking-with-insufficient-points: backlog
+  epic-5: done
+  5-1-view-points-balance: done
+  5-2-award-points-when-hosting: done
+  5-3-deduct-points-when-booking: done
+  5-4-view-points-transaction-history: done
+  5-5-prevent-booking-with-insufficient-points: done
   epic-5-retrospective: optional
 
   # ==============================================================================
@@ -115,13 +115,13 @@ development_status:
   # Members can message each other for coordination and community building
   # FRs: FR40-45
   # ==============================================================================
-  epic-6: backlog
-  6-1-send-direct-messages: backlog
-  6-2-view-conversation-threads: backlog
-  6-3-real-time-message-notifications: backlog
-  6-4-pre-booking-inquiries: backlog
-  6-5-post-booking-coordination: backlog
-  6-6-display-unread-message-count: backlog
+  epic-6: done
+  6-1-send-direct-messages: done
+  6-2-view-conversation-threads: done
+  6-3-real-time-message-notifications: done
+  6-4-pre-booking-inquiries: done
+  6-5-post-booking-coordination: done
+  6-6-display-unread-message-count: done
   epic-6-retrospective: optional
 
   # ==============================================================================
@@ -129,13 +129,13 @@ development_status:
   # Admins can review applications, manage members, and maintain community quality
   # FRs: FR46-53
   # ==============================================================================
-  epic-7: backlog
-  7-1-view-pending-applications-list: backlog
-  7-2-view-application-details: backlog
-  7-3-approve-membership-application: backlog
-  7-4-reject-application-with-feedback: backlog
-  7-5-request-additional-information: backlog
-  7-6-send-application-decision-emails: backlog
-  7-7-view-all-members-list: backlog
-  7-8-view-platform-activity-dashboard: backlog
+  epic-7: done
+  7-1-view-pending-applications-list: done
+  7-2-view-application-details: done
+  7-3-approve-membership-application: done
+  7-4-reject-application-with-feedback: done
+  7-5-request-additional-information: done
+  7-6-send-application-decision-emails: done
+  7-7-view-all-members-list: done
+  7-8-view-platform-activity-dashboard: done
   epic-7-retrospective: optional

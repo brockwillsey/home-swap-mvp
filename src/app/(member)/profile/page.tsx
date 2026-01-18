@@ -78,7 +78,7 @@ export default async function ProfilePage() {
 
   return (
     <main className="min-h-screen bg-background">
-      <MemberHeader activePage="profile" />
+      <MemberHeader activePage="profile" userPoints={profileData.points} />
 
       {/* Main Content */}
       <div className="container mx-auto px-4 py-8">
@@ -135,11 +135,15 @@ export default async function ProfilePage() {
                   </p>
 
                   {/* Points */}
-                  <div className="mt-4 rounded-lg bg-primary/10 px-4 py-2">
+                  <Link
+                    href="/points"
+                    className="mt-4 block rounded-lg bg-primary/10 px-4 py-2 transition-colors hover:bg-primary/20"
+                  >
                     <p className="text-sm font-medium text-primary">
                       {profileData.points} points
                     </p>
-                  </div>
+                    <p className="text-xs text-primary/70">View history →</p>
+                  </Link>
                 </div>
               </CardContent>
             </Card>

@@ -637,3 +637,299 @@ Once you've provided the information, we'll continue reviewing your application.
 © ${new Date().getFullYear()} Art Res. All rights reserved.
 `;
 }
+
+// =============================================================================
+// Booking Emails (Stories 4-4, 4-10, 4-11)
+// =============================================================================
+
+/**
+ * Send booking request notification to host
+ */
+export async function sendBookingRequestEmail({
+  hostEmail,
+  hostName,
+  guestName,
+  listingTitle,
+  startDate,
+  endDate,
+  bookingType,
+  reservationId,
+}: {
+  hostEmail: string;
+  hostName: string | null;
+  guestName: string | null;
+  listingTitle: string;
+  startDate: Date;
+  endDate: Date;
+  bookingType: "POINTS" | "SWAP";
+  reservationId: string;
+}): Promise<void> {
+  if (!resend) {
+    console.log("Resend not configured - skipping booking request email");
+    return;
+  }
+
+  const safeHostName = hostName ?? "Host";
+  const safeGuestName = guestName ?? "A member";
+  const dateRange = `${startDate.toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })} - ${endDate.toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}`;
+
+  const { error } = await resend.emails.send({
+    from: DEFAULT_FROM_EMAIL,
+    to: hostEmail,
+    subject: `New Booking Request - ${listingTitle}`,
+    html: `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body style="background-color: #FAFAF9; font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; margin: 0; padding: 40px 20px;">
+  <table role="presentation" style="max-width: 560px; margin: 0 auto; background-color: #ffffff; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);">
+    <tr>
+      <td style="padding: 40px;">
+        <div style="text-align: center; margin-bottom: 32px;">
+          <h1 style="color: #2C5545; font-size: 28px; font-weight: 700; margin: 0;">Art Res</h1>
+        </div>
+        <h2 style="color: #1f2937; font-size: 20px; font-weight: 600; margin: 0 0 16px;">New Booking Request!</h2>
+        <p style="color: #6b7280; font-size: 16px; line-height: 1.5; margin: 0 0 24px;">
+          Hi ${escapeHtml(safeHostName)}, ${escapeHtml(safeGuestName)} wants to stay at your listing.
+        </p>
+        <div style="background-color: #f3f4f6; border-radius: 8px; padding: 20px; margin-bottom: 24px;">
+          <p style="margin: 0 0 8px;"><strong>Listing:</strong> ${escapeHtml(listingTitle)}</p>
+          <p style="margin: 0 0 8px;"><strong>Dates:</strong> ${dateRange}</p>
+          <p style="margin: 0;"><strong>Type:</strong> ${bookingType === "POINTS" ? "Points Exchange" : "Home Swap"}</p>
+        </div>
+        <p style="color: #6b7280; font-size: 14px;">
+          Sign in to Art Res to review and respond to this request.
+        </p>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
+`,
+    text: `New Booking Request - Art Res
+
+Hi ${safeHostName},
+
+${safeGuestName} wants to stay at ${listingTitle}.
+
+Dates: ${dateRange}
+Type: ${bookingType === "POINTS" ? "Points Exchange" : "Home Swap"}
+
+Sign in to Art Res to review and respond to this request.
+`,
+  });
+
+  if (error) {
+    console.error("Failed to send booking request email:", error);
+  }
+}
+
+/**
+ * Send booking confirmation email to both parties
+ */
+export async function sendBookingConfirmationEmail({
+  guestEmail,
+  guestName,
+  hostEmail,
+  hostName,
+  listingTitle,
+  location,
+  startDate,
+  endDate,
+  bookingType,
+  pointsCost,
+}: {
+  guestEmail: string;
+  guestName: string | null;
+  hostEmail: string;
+  hostName: string | null;
+  listingTitle: string;
+  location: string;
+  startDate: Date;
+  endDate: Date;
+  bookingType: "POINTS" | "SWAP";
+  pointsCost: number | null;
+}): Promise<void> {
+  if (!resend) {
+    console.log("Resend not configured - skipping confirmation emails");
+    return;
+  }
+
+  const dateRange = `${startDate.toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })} - ${endDate.toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}`;
+  const safeGuestName = guestName ?? "Guest";
+  const safeHostName = hostName ?? "Host";
+
+  // Email to guest
+  await resend.emails.send({
+    from: DEFAULT_FROM_EMAIL,
+    to: guestEmail,
+    subject: `Booking Confirmed - ${listingTitle}`,
+    html: `
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"></head>
+<body style="background-color: #FAFAF9; font-family: 'Inter', sans-serif; margin: 0; padding: 40px 20px;">
+  <table style="max-width: 560px; margin: 0 auto; background: #fff; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+    <tr><td style="padding: 40px;">
+      <div style="text-align: center; margin-bottom: 32px;">
+        <h1 style="color: #2C5545; font-size: 28px; margin: 0;">Art Res</h1>
+      </div>
+      <div style="text-align: center; margin-bottom: 24px;">
+        <span style="font-size: 48px;">🎉</span>
+      </div>
+      <h2 style="color: #1f2937; font-size: 24px; text-align: center; margin: 0 0 16px;">Booking Confirmed!</h2>
+      <p style="color: #6b7280; font-size: 16px; text-align: center; margin: 0 0 24px;">
+        Hi ${escapeHtml(safeGuestName)}, your stay is confirmed!
+      </p>
+      <div style="background: #dcfce7; border-radius: 8px; padding: 20px; margin-bottom: 24px;">
+        <p style="margin: 0 0 8px;"><strong>${escapeHtml(listingTitle)}</strong></p>
+        <p style="margin: 0 0 8px; color: #6b7280;">${escapeHtml(location)}</p>
+        <p style="margin: 0;"><strong>Dates:</strong> ${dateRange}</p>
+        ${pointsCost ? `<p style="margin: 8px 0 0;"><strong>Points:</strong> ${pointsCost} points</p>` : ""}
+      </div>
+      <p style="color: #6b7280; font-size: 14px;">Your host ${escapeHtml(safeHostName)} will be in touch with check-in details.</p>
+    </td></tr>
+  </table>
+</body>
+</html>
+`,
+    text: `Booking Confirmed! - Art Res
+
+Hi ${safeGuestName},
+
+Your stay is confirmed!
+
+${listingTitle}
+${location}
+Dates: ${dateRange}
+${pointsCost ? `Points: ${pointsCost}` : ""}
+
+Your host ${safeHostName} will be in touch with check-in details.
+`,
+  });
+
+  // Email to host
+  await resend.emails.send({
+    from: DEFAULT_FROM_EMAIL,
+    to: hostEmail,
+    subject: `Booking Confirmed - ${safeGuestName} is coming!`,
+    html: `
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"></head>
+<body style="background-color: #FAFAF9; font-family: 'Inter', sans-serif; margin: 0; padding: 40px 20px;">
+  <table style="max-width: 560px; margin: 0 auto; background: #fff; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+    <tr><td style="padding: 40px;">
+      <div style="text-align: center; margin-bottom: 32px;">
+        <h1 style="color: #2C5545; font-size: 28px; margin: 0;">Art Res</h1>
+      </div>
+      <h2 style="color: #1f2937; font-size: 20px; margin: 0 0 16px;">You have a guest coming!</h2>
+      <p style="color: #6b7280; font-size: 16px; margin: 0 0 24px;">
+        Hi ${escapeHtml(safeHostName)}, ${escapeHtml(safeGuestName)} has confirmed their stay at ${escapeHtml(listingTitle)}.
+      </p>
+      <div style="background: #f3f4f6; border-radius: 8px; padding: 20px; margin-bottom: 24px;">
+        <p style="margin: 0 0 8px;"><strong>Guest:</strong> ${escapeHtml(safeGuestName)}</p>
+        <p style="margin: 0 0 8px;"><strong>Dates:</strong> ${dateRange}</p>
+        <p style="margin: 0;"><strong>Type:</strong> ${bookingType === "POINTS" ? "Points Exchange" : "Home Swap"}</p>
+      </div>
+      <p style="color: #6b7280; font-size: 14px;">Please reach out to your guest with check-in instructions.</p>
+    </td></tr>
+  </table>
+</body>
+</html>
+`,
+    text: `You have a guest coming! - Art Res
+
+Hi ${safeHostName},
+
+${safeGuestName} has confirmed their stay at ${listingTitle}.
+
+Guest: ${safeGuestName}
+Dates: ${dateRange}
+Type: ${bookingType === "POINTS" ? "Points Exchange" : "Home Swap"}
+
+Please reach out to your guest with check-in instructions.
+`,
+  });
+}
+
+/**
+ * Send booking declined email to guest
+ */
+export async function sendBookingDeclinedEmail({
+  guestEmail,
+  guestName,
+  hostName,
+  listingTitle,
+  startDate,
+  endDate,
+  message,
+}: {
+  guestEmail: string;
+  guestName: string | null;
+  hostName: string | null;
+  listingTitle: string;
+  startDate: Date;
+  endDate: Date;
+  message?: string;
+}): Promise<void> {
+  if (!resend) {
+    console.log("Resend not configured - skipping declined email");
+    return;
+  }
+
+  const dateRange = `${startDate.toLocaleDateString("en-US", { month: "long", day: "numeric" })} - ${endDate.toLocaleDateString("en-US", { month: "long", day: "numeric" })}`;
+  const safeGuestName = guestName ?? "there";
+  const safeHostName = hostName ?? "The host";
+
+  const { error } = await resend.emails.send({
+    from: DEFAULT_FROM_EMAIL,
+    to: guestEmail,
+    subject: `Booking Request Update - ${listingTitle}`,
+    html: `
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"></head>
+<body style="background-color: #FAFAF9; font-family: 'Inter', sans-serif; margin: 0; padding: 40px 20px;">
+  <table style="max-width: 560px; margin: 0 auto; background: #fff; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+    <tr><td style="padding: 40px;">
+      <div style="text-align: center; margin-bottom: 32px;">
+        <h1 style="color: #2C5545; font-size: 28px; margin: 0;">Art Res</h1>
+      </div>
+      <h2 style="color: #1f2937; font-size: 20px; margin: 0 0 16px;">Booking Request Declined</h2>
+      <p style="color: #6b7280; font-size: 16px; margin: 0 0 24px;">
+        Hi ${escapeHtml(safeGuestName)}, unfortunately your booking request for ${escapeHtml(listingTitle)} (${dateRange}) was not approved.
+      </p>
+      ${message ? `
+      <div style="background: #f3f4f6; border-radius: 8px; padding: 20px; margin-bottom: 24px;">
+        <p style="margin: 0 0 8px; font-weight: 600;">Message from ${escapeHtml(safeHostName)}:</p>
+        <p style="margin: 0; color: #6b7280;">"${escapeHtml(message)}"</p>
+      </div>
+      ` : ""}
+      <p style="color: #6b7280; font-size: 14px;">
+        Don't worry - there are many other amazing homes to discover. Keep searching!
+      </p>
+    </td></tr>
+  </table>
+</body>
+</html>
+`,
+    text: `Booking Request Declined - Art Res
+
+Hi ${safeGuestName},
+
+Unfortunately your booking request for ${listingTitle} (${dateRange}) was not approved.
+
+${message ? `Message from ${safeHostName}: "${message}"` : ""}
+
+Don't worry - there are many other amazing homes to discover. Keep searching!
+`,
+  });
+
+  if (error) {
+    console.error("Failed to send declined email:", error);
+  }
+}
