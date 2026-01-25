@@ -13,6 +13,8 @@ interface SearchPageProps {
     location?: string;
     startDate?: string;
     endDate?: string;
+    exchangeType?: "SWAP_ONLY" | "POINTS_ONLY" | "BOTH" | "ALL";
+    bookingMode?: "INSTANT_BOOK" | "REQUIRES_APPROVAL" | "ALL";
   }>;
 }
 
@@ -36,7 +38,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
     select: { name: true },
   });
 
-  const { location, startDate, endDate } = params;
+  const { location, startDate, endDate, exchangeType, bookingMode } = params;
 
   return (
     <main className="min-h-screen bg-background">
@@ -53,6 +55,8 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
               initialLocation={location}
               initialStartDate={startDate}
               initialEndDate={endDate}
+              initialExchangeType={exchangeType}
+              initialBookingMode={bookingMode}
             />
           </Suspense>
         </div>
@@ -63,6 +67,8 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
             location={location}
             startDate={startDate}
             endDate={endDate}
+            exchangeType={exchangeType}
+            bookingMode={bookingMode}
           />
         </Suspense>
       </div>

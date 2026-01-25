@@ -6,10 +6,15 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "~/components/ui/button";
 import { api } from "~/trpc/react";
 
+type ExchangeTypeFilter = "ALL" | "SWAP_ONLY" | "POINTS_ONLY" | "BOTH";
+type BookingModeFilter = "ALL" | "INSTANT_BOOK" | "REQUIRES_APPROVAL";
+
 interface SearchBarProps {
   initialLocation?: string;
   initialStartDate?: string;
   initialEndDate?: string;
+  initialExchangeType?: ExchangeTypeFilter;
+  initialBookingMode?: BookingModeFilter;
 }
 
 /**
@@ -22,6 +27,8 @@ export function SearchBar({
   initialLocation = "",
   initialStartDate = "",
   initialEndDate = "",
+  initialExchangeType = "ALL",
+  initialBookingMode = "ALL",
 }: SearchBarProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -29,6 +36,8 @@ export function SearchBar({
   const [location, setLocation] = useState(initialLocation);
   const [startDate, setStartDate] = useState(initialStartDate);
   const [endDate, setEndDate] = useState(initialEndDate);
+  const [exchangeType, setExchangeType] = useState<ExchangeTypeFilter>(initialExchangeType);
+  const [bookingMode, setBookingMode] = useState<BookingModeFilter>(initialBookingMode);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [debouncedLocation, setDebouncedLocation] = useState("");
 
@@ -80,6 +89,12 @@ export function SearchBar({
     }
     if (endDate) {
       params.set("endDate", endDate);
+    }
+    if (exchangeType && exchangeType !== "ALL") {
+      params.set("exchangeType", exchangeType);
+    }
+    if (bookingMode && bookingMode !== "ALL") {
+      params.set("bookingMode", bookingMode);
     }
 
     router.push(`/search?${params.toString()}`);
@@ -215,6 +230,47 @@ export function SearchBar({
             min={startDate || today}
             className="w-full rounded-lg border bg-background px-3 py-2.5 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
           />
+        </div>
+
+        {/* Exchange Type Filter */}
+        <div className="flex-1 md:max-w-[140px]">
+          <label
+            htmlFor="exchangeType"
+            className="mb-1.5 block text-sm font-medium text-foreground"
+          >
+            Type
+          </label>
+          <select
+            id="exchangeType"
+            value={exchangeType}
+            onChange={(e) => setExchangeType(e.target.value as ExchangeTypeFilter)}
+            className="w-full rounded-lg border bg-background px-3 py-2.5 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+          >
+            <option value="ALL">All Types</option>
+            <option value="SWAP_ONLY">Swaps</option>
+            <option value="POINTS_ONLY">Points</option>
+            <option value="BOTH">Both</option>
+          </select>
+        </div>
+
+        {/* Booking Mode Filter */}
+        <div className="flex-1 md:max-w-[140px]">
+          <label
+            htmlFor="bookingMode"
+            className="mb-1.5 block text-sm font-medium text-foreground"
+          >
+            Booking
+          </label>
+          <select
+            id="bookingMode"
+            value={bookingMode}
+            onChange={(e) => setBookingMode(e.target.value as BookingModeFilter)}
+            className="w-full rounded-lg border bg-background px-3 py-2.5 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+          >
+            <option value="ALL">Any</option>
+            <option value="INSTANT_BOOK">Instant Book</option>
+            <option value="REQUIRES_APPROVAL">Request</option>
+          </select>
         </div>
 
         {/* Search Button */}

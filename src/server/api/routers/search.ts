@@ -22,25 +22,18 @@ export const searchRouter = createTRPCRouter({
         location: z.string().optional(),
         startDate: z.string().datetime().optional(),
         endDate: z.string().datetime().optional(),
+        exchangeType: z.enum(["SWAP_ONLY", "POINTS_ONLY", "BOTH", "ALL"]).optional(),
+        bookingMode: z.enum(["INSTANT_BOOK", "REQUIRES_APPROVAL", "ALL"]).optional(),
         limit: z.number().min(1).max(50).default(20),
         cursor: z.string().optional(),
       })
     )
     .query(async ({ ctx, input }) => {
-      const { location, startDate, endDate, limit, cursor } = input;
+      const { location, startDate, endDate, exchangeType, bookingMode, limit, cursor } = input;
 
       // Build where clause
-      const where: {
-        isActive: boolean;
-        ownerId?: { not: string };
-        location?: { contains: string };
-        availability?: {
-          some: {
-            startDate: { lte: Date };
-            endDate: { gte: Date };
-          };
-        };
-      } = {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const where: any = {
         isActive: true,
         // Don't show user's own listings in search
         ownerId: { not: ctx.session.user.id },
@@ -51,6 +44,24 @@ export const searchRouter = createTRPCRouter({
         where.location = {
           contains: location.trim(),
         };
+      }
+
+      // Exchange type filter
+      if (exchangeType && exchangeType !== "ALL") {
+        if (exchangeType === "SWAP_ONLY") {
+          // Show listings that accept swaps (SWAP_ONLY or BOTH)
+          where.exchangeType = { in: ["SWAP_ONLY", "BOTH"] };
+        } else if (exchangeType === "POINTS_ONLY") {
+          // Show listings that accept points (POINTS_ONLY or BOTH)
+          where.exchangeType = { in: ["POINTS_ONLY", "BOTH"] };
+        } else {
+          where.exchangeType = exchangeType;
+        }
+      }
+
+      // Booking mode filter
+      if (bookingMode && bookingMode !== "ALL") {
+        where.bookingMode = bookingMode;
       }
 
       // Date range filter - only show homes available during requested dates

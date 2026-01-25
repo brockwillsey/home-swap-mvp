@@ -12,6 +12,8 @@ interface SearchResultsProps {
   location?: string;
   startDate?: string;
   endDate?: string;
+  exchangeType?: "SWAP_ONLY" | "POINTS_ONLY" | "BOTH" | "ALL";
+  bookingMode?: "INSTANT_BOOK" | "REQUIRES_APPROVAL" | "ALL";
 }
 
 /**
@@ -24,6 +26,8 @@ export function SearchResults({
   location,
   startDate,
   endDate,
+  exchangeType,
+  bookingMode,
 }: SearchResultsProps) {
   const { ref, inView } = useInView();
 
@@ -39,6 +43,8 @@ export function SearchResults({
       location,
       startDate: startDate ? new Date(startDate).toISOString() : undefined,
       endDate: endDate ? new Date(endDate).toISOString() : undefined,
+      exchangeType,
+      bookingMode,
       limit: 12,
     },
     {
@@ -136,6 +142,9 @@ export function SearchResults({
       <p className="mb-4 text-sm text-muted-foreground">
         {homes.length} home{homes.length !== 1 ? "s" : ""} found
         {location ? ` in "${location}"` : ""}
+        {exchangeType && exchangeType !== "ALL" && (
+          <> ({exchangeType === "SWAP_ONLY" ? "Swaps" : exchangeType === "POINTS_ONLY" ? "Points" : "Swaps & Points"})</>
+        )}
         {startDate && endDate && (
           <>
             {" "}for {new Date(startDate).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
