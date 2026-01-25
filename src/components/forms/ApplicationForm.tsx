@@ -42,7 +42,7 @@ export function ApplicationForm() {
       email: "",
       bio: "",
       location: "",
-      creativeInterests: "",
+      creativeInterests: [],
       reasonForJoining: "",
       profilePhotoUrl: "",
       homePhotos: [],
@@ -66,7 +66,19 @@ export function ApplicationForm() {
 
   async function onSubmit(data: ApplicationFormData) {
     setSubmitError(null);
-    createApplication.mutate(data);
+    // Transform membership roles array to human-readable string for storage
+    const roleLabels: Record<string, string> = {
+      HOME_OWNER: "Home Owner",
+      ARTIST: "Artist",
+      ARTIST_SPONSOR: "Artists Sponsor",
+    };
+    const transformedData = {
+      ...data,
+      creativeInterests: (data.creativeInterests as unknown as string[])
+        .map((role) => roleLabels[role] ?? role)
+        .join(", "),
+    };
+    createApplication.mutate(transformedData as unknown as ApplicationFormData);
   }
 
   const isSubmitting = createApplication.isPending;
@@ -206,24 +218,50 @@ export function ApplicationForm() {
               )}
             />
 
-            {/* Creative Interests */}
+            {/* Membership Roles */}
             <FormField
               control={form.control}
               name="creativeInterests"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Creative Interests *</FormLabel>
-                  <FormControl>
-                    <Textarea
-                      placeholder="What are your creative pursuits? Art, design, music, writing, etc..."
-                      className="min-h-[100px] resize-y"
-                      disabled={isSubmitting}
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormDescription>
-                    Art Res is a community for creatives. Share your artistic interests.
+                  <FormLabel>Art Residency Home Exchange Membership Role *</FormLabel>
+                  <FormDescription className="mb-3">
+                    Select all roles that apply to you.
                   </FormDescription>
+                  <FormControl>
+                    <div className="space-y-3">
+                      {[
+                        { value: "HOME_OWNER", label: "Home Owner" },
+                        { value: "ARTIST", label: "Artist" },
+                        { value: "ARTIST_SPONSOR", label: "Artists Sponsor (home or donation)" },
+                      ].map((role) => (
+                        <label
+                          key={role.value}
+                          className={`flex cursor-pointer items-center gap-3 rounded-lg border p-4 transition-colors ${
+                            (field.value as unknown as string[])?.includes(role.value)
+                              ? "border-primary bg-primary/5"
+                              : "border-border hover:border-primary/50"
+                          } ${isSubmitting ? "cursor-not-allowed opacity-50" : ""}`}
+                        >
+                          <input
+                            type="checkbox"
+                            checked={(field.value as unknown as string[])?.includes(role.value) ?? false}
+                            onChange={(e) => {
+                              const currentValues = (field.value as unknown as string[]) ?? [];
+                              if (e.target.checked) {
+                                field.onChange([...currentValues, role.value]);
+                              } else {
+                                field.onChange(currentValues.filter((v) => v !== role.value));
+                              }
+                            }}
+                            disabled={isSubmitting}
+                            className="h-5 w-5 rounded border-gray-300 text-primary focus:ring-primary"
+                          />
+                          <span className="text-sm font-medium">{role.label}</span>
+                        </label>
+                      ))}
+                    </div>
+                  </FormControl>
                   <FormMessage />
                 </FormItem>
               )}

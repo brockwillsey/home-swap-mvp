@@ -54,6 +54,16 @@ export const applicationRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       const { email, name, bio, location, creativeInterests, reasonForJoining, profilePhotoUrl, homePhotos } = input;
 
+      // Transform membership roles array to human-readable string for storage
+      const roleLabels: Record<string, string> = {
+        HOME_OWNER: "Home Owner",
+        ARTIST: "Artist",
+        ARTIST_SPONSOR: "Artists Sponsor",
+      };
+      const creativeInterestsStr = creativeInterests
+        .map((role) => roleLabels[role] ?? role)
+        .join(", ");
+
       try {
         // Check if user already exists
         const existingUser = await ctx.db.user.findUnique({
@@ -87,7 +97,7 @@ export const applicationRouter = createTRPCRouter({
                 status: "PENDING",
                 bio,
                 location,
-                creativeInterests,
+                creativeInterests: creativeInterestsStr,
                 reasonForJoining,
                 profilePhotoUrl,
                 homePhotos: JSON.stringify(homePhotos),
@@ -135,7 +145,7 @@ export const applicationRouter = createTRPCRouter({
               status: "PENDING",
               bio,
               location,
-              creativeInterests,
+              creativeInterests: creativeInterestsStr,
               reasonForJoining,
               profilePhotoUrl,
               homePhotos: JSON.stringify(homePhotos),

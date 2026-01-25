@@ -44,7 +44,7 @@ const homePhotosSchema = z
  * - email: Valid email address (normalized to lowercase, trimmed)
  * - bio: About the applicant (min 50 chars for quality, trimmed)
  * - location: Where they live (city/region, trimmed)
- * - creativeInterests: Their creative background/interests (trimmed)
+ * - creativeInterests: Membership roles stored as comma-separated string
  * - reasonForJoining: Why they want to join Art Res (trimmed)
  * - profilePhotoUrl: Cloudinary URL for profile photo (validated domain)
  * - homePhotos: Array of Cloudinary URLs for home photos (min 3, max 10, validated domain)
@@ -87,14 +87,8 @@ export const applicationFormSchema = z.object({
     ),
 
   creativeInterests: z
-    .string()
-    .transform((s) => s.trim())
-    .pipe(
-      z
-        .string()
-        .min(10, "Please describe your creative interests (at least 10 characters)")
-        .max(500, "Creative interests must be less than 500 characters")
-    ),
+    .array(z.enum(["HOME_OWNER", "ARTIST", "ARTIST_SPONSOR"]))
+    .min(1, "Please select at least one membership role"),
 
   reasonForJoining: z
     .string()
