@@ -1,6 +1,7 @@
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import { type DefaultSession, type NextAuthConfig } from "next-auth";
 import Resend from "next-auth/providers/resend";
+import Credentials from "next-auth/providers/credentials";
 
 import { db } from "~/server/db";
 import { env } from "~/env";
@@ -44,12 +45,23 @@ export const authConfig = {
       maxAge: 10 * 60,
       // Custom branded email template
       async sendVerificationRequest({ identifier: email, url, provider }) {
+        const host = new URL(url).host;
+
+        // Dev mode: log magic link to console instead of sending email
+        if (process.env.NODE_ENV === "development") {
+          console.log("\n" + "=".repeat(60));
+          console.log("🔐 DEV MODE - Magic Link Login");
+          console.log("=".repeat(60));
+          console.log(`Email: ${email}`);
+          console.log(`\n👉 Click here to sign in:\n${url}\n`);
+          console.log("=".repeat(60) + "\n");
+          return;
+        }
+
         if (!resend) {
           console.error("RESEND_API_KEY not configured - cannot send magic link");
           throw new Error("Email service not configured. Please contact support.");
         }
-
-        const host = new URL(url).host;
 
         try {
           const { error } = await resend.emails.send({

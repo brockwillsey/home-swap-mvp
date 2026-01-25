@@ -245,6 +245,107 @@ If you have any questions, please reply to this email.
 }
 
 // =============================================================================
+// Admin Notification Emails
+// =============================================================================
+
+/**
+ * Send notification to admin when a new application is submitted
+ */
+export async function sendNewApplicationNotificationEmail({
+  adminEmail,
+  applicantName,
+  applicantEmail,
+  location,
+  creativeInterests,
+  applicationId,
+}: {
+  adminEmail: string;
+  applicantName: string;
+  applicantEmail: string;
+  location: string;
+  creativeInterests: string;
+  applicationId: string;
+}): Promise<void> {
+  if (!resend) {
+    console.log("Resend not configured - skipping admin notification email");
+    return;
+  }
+
+  const adminUrl = `${process.env.NEXTAUTH_URL ?? "http://localhost:3000"}/admin/applications`;
+
+  const { error } = await resend.emails.send({
+    from: DEFAULT_FROM_EMAIL,
+    to: adminEmail,
+    subject: `New Membership Application - ${applicantName}`,
+    html: `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body style="background-color: #FAFAF9; font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; margin: 0; padding: 40px 20px;">
+  <table role="presentation" style="max-width: 560px; margin: 0 auto; background-color: #ffffff; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);">
+    <tr>
+      <td style="padding: 40px;">
+        <div style="text-align: center; margin-bottom: 32px;">
+          <h1 style="color: #2C5545; font-size: 28px; font-weight: 700; margin: 0;">Art Res</h1>
+          <p style="color: #6b7280; font-size: 14px; margin: 8px 0 0;">Admin Notification</p>
+        </div>
+
+        <div style="background-color: #C4A77D; color: white; padding: 12px 20px; border-radius: 8px; text-align: center; margin-bottom: 24px;">
+          <span style="font-size: 16px; font-weight: 600;">🆕 New Application Submitted</span>
+        </div>
+
+        <h2 style="color: #1f2937; font-size: 20px; font-weight: 600; margin: 0 0 24px;">Application Details</h2>
+
+        <div style="background-color: #f3f4f6; border-radius: 8px; padding: 20px; margin-bottom: 24px;">
+          <p style="margin: 0 0 12px;"><strong>Name:</strong> ${escapeHtml(applicantName)}</p>
+          <p style="margin: 0 0 12px;"><strong>Email:</strong> ${escapeHtml(applicantEmail)}</p>
+          <p style="margin: 0 0 12px;"><strong>Location:</strong> ${escapeHtml(location)}</p>
+          <p style="margin: 0;"><strong>Creative Interests:</strong> ${escapeHtml(creativeInterests)}</p>
+        </div>
+
+        <div style="text-align: center;">
+          <a href="${adminUrl}" style="display: inline-block; background-color: #2C5545; color: #ffffff; font-size: 16px; font-weight: 600; text-decoration: none; padding: 14px 32px; border-radius: 8px;">
+            Review Application
+          </a>
+        </div>
+
+        <div style="border-top: 1px solid #e5e7eb; margin-top: 32px; padding-top: 24px; text-align: center;">
+          <p style="color: #9ca3af; font-size: 12px; margin: 0;">
+            This is an automated admin notification from Art Res.
+          </p>
+        </div>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
+`,
+    text: `New Membership Application - Art Res
+
+A new membership application has been submitted.
+
+APPLICANT DETAILS
+=================
+Name: ${applicantName}
+Email: ${applicantEmail}
+Location: ${location}
+Creative Interests: ${creativeInterests}
+
+Review the application at: ${adminUrl}
+
+This is an automated admin notification from Art Res.
+`,
+  });
+
+  if (error) {
+    console.error("Failed to send admin notification email:", error);
+  }
+}
+
+// =============================================================================
 // Application Decision Emails (Story 1.9)
 // =============================================================================
 

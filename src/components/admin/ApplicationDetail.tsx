@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
@@ -9,6 +9,18 @@ import { toast } from "sonner";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/components/ui/card";
 import { Button } from "~/components/ui/button";
 import { api } from "~/trpc/react";
+
+// Parse photos from JSON string or return as-is if already array
+function parsePhotos(photos: string | string[]): string[] {
+  if (typeof photos === "string") {
+    try {
+      return JSON.parse(photos) as string[];
+    } catch {
+      return [];
+    }
+  }
+  return photos;
+}
 
 interface ApplicationDetailProps {
   applicationId: string;
@@ -197,12 +209,12 @@ export function ApplicationDetail({ applicationId }: ApplicationDetailProps) {
           <CardHeader>
             <CardTitle>Home Photos</CardTitle>
             <CardDescription>
-              {application.homePhotos.length} photo{application.homePhotos.length !== 1 ? "s" : ""} submitted
+              {parsePhotos(application.homePhotos).length} photo{parsePhotos(application.homePhotos).length !== 1 ? "s" : ""} submitted
             </CardDescription>
           </CardHeader>
           <CardContent>
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {application.homePhotos.map((photo, index) => (
+              {parsePhotos(application.homePhotos).map((photo: string, index: number) => (
                 <div
                   key={index}
                   className="relative aspect-video overflow-hidden rounded-lg bg-muted"

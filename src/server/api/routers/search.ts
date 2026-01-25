@@ -33,7 +33,7 @@ export const searchRouter = createTRPCRouter({
       const where: {
         isActive: boolean;
         ownerId?: { not: string };
-        location?: { contains: string; mode: "insensitive" };
+        location?: { contains: string };
         availability?: {
           some: {
             startDate: { lte: Date };
@@ -46,11 +46,10 @@ export const searchRouter = createTRPCRouter({
         ownerId: { not: ctx.session.user.id },
       };
 
-      // Location filter (case-insensitive contains)
+      // Location filter (SQLite LIKE is case-insensitive by default for ASCII)
       if (location && location.trim()) {
         where.location = {
           contains: location.trim(),
-          mode: "insensitive",
         };
       }
 
@@ -96,8 +95,16 @@ export const searchRouter = createTRPCRouter({
         nextCursor = nextItem?.id;
       }
 
+      // Parse photos JSON string to array
+      const homesWithParsedPhotos = homes.map((home) => ({
+        ...home,
+        photos: typeof home.photos === "string"
+          ? (JSON.parse(home.photos) as string[])
+          : home.photos,
+      }));
+
       return {
-        homes,
+        homes: homesWithParsedPhotos,
         nextCursor,
       };
     }),
@@ -122,7 +129,6 @@ export const searchRouter = createTRPCRouter({
           isActive: true,
           location: {
             contains: query,
-            mode: "insensitive",
           },
         },
         select: {
@@ -175,6 +181,12 @@ export const searchRouter = createTRPCRouter({
         return null;
       }
 
-      return listing;
+      // Parse photos JSON string to array
+      return {
+        ...listing,
+        photos: typeof listing.photos === "string"
+          ? (JSON.parse(listing.photos) as string[])
+          : listing.photos,
+      };
     }),
 });

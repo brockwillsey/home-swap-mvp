@@ -17,7 +17,8 @@ import type Stripe from "stripe";
 
 import { stripe, getStripeWebhookSecret } from "~/lib/services/stripe";
 import { db } from "~/server/db";
-import { sendApplicationConfirmationEmail } from "~/lib/services/resend";
+import { sendApplicationConfirmationEmail, sendNewApplicationNotificationEmail } from "~/lib/services/resend";
+import { env } from "~/env";
 
 export async function POST(req: Request) {
   // Get webhook secret - returns null if not configured
@@ -141,7 +142,7 @@ async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session) 
     paymentIntent: session.payment_intent,
   });
 
-  // Send confirmation email
+  // Send confirmation email to applicant
   if (application.user.email) {
     try {
       await sendApplicationConfirmationEmail({
@@ -152,6 +153,23 @@ async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session) 
     } catch (emailError) {
       // Log email error but don't fail the webhook
       console.error("Failed to send confirmation email:", emailError);
+    }
+  }
+
+  // Send notification email to admin
+  if (env.ADMIN_EMAIL) {
+    try {
+      await sendNewApplicationNotificationEmail({
+        adminEmail: env.ADMIN_EMAIL,
+        applicantName: application.user.name ?? "Unknown",
+        applicantEmail: application.user.email ?? "Unknown",
+        location: application.location,
+        creativeInterests: application.creativeInterests,
+        applicationId: application.id,
+      });
+      console.log(`Admin notification sent to ${env.ADMIN_EMAIL}`);
+    } catch (emailError) {
+      console.error("Failed to send admin notification email:", emailError);
     }
   }
 }

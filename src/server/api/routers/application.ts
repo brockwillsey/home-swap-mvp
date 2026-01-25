@@ -90,7 +90,7 @@ export const applicationRouter = createTRPCRouter({
                 creativeInterests,
                 reasonForJoining,
                 profilePhotoUrl,
-                homePhotos,
+                homePhotos: JSON.stringify(homePhotos),
                 feedback: null, // Clear previous feedback
                 stripePaymentId: null, // Clear previous payment ID for new application
                 reviewedAt: null, // Clear previous review timestamp
@@ -138,7 +138,7 @@ export const applicationRouter = createTRPCRouter({
               creativeInterests,
               reasonForJoining,
               profilePhotoUrl,
-              homePhotos,
+              homePhotos: JSON.stringify(homePhotos),
             },
           });
         });

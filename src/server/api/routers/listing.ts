@@ -53,7 +53,7 @@ export const listingRouter = createTRPCRouter({
           title: title.trim(),
           description: description.trim(),
           location: location.trim(),
-          photos: [], // Photos added in Story 2.2
+          photos: "[]", // Photos added in Story 2.2 (stored as JSON string)
           isActive: false, // Draft until photos added
         },
       });
@@ -186,15 +186,15 @@ export const listingRouter = createTRPCRouter({
         });
       }
 
-      // Update photos array
+      // Update photos (store as JSON string)
       const listing = await ctx.db.home.update({
         where: { id },
-        data: { photos },
+        data: { photos: JSON.stringify(photos) },
       });
 
       return {
         id: listing.id,
-        photoCount: listing.photos.length,
+        photoCount: photos.length,
         success: true,
       };
     }),
@@ -229,11 +229,12 @@ export const listingRouter = createTRPCRouter({
         });
       }
 
-      // Validate minimum photos
-      if (existing.photos.length < 3) {
+      // Validate minimum photos (parse JSON string)
+      const photos = JSON.parse(existing.photos) as string[];
+      if (photos.length < 3) {
         throw new TRPCError({
           code: "BAD_REQUEST",
-          message: `At least 3 photos are required to publish. You have ${existing.photos.length}.`,
+          message: `At least 3 photos are required to publish. You have ${photos.length}.`,
         });
       }
 

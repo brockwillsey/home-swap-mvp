@@ -155,7 +155,7 @@ export default async function ListingPhotosPage({
         <ListingPhotosForm
           listingId={listing.id}
           listingTitle={listing.title}
-          initialPhotos={listing.photos}
+          initialPhotos={typeof listing.photos === "string" ? JSON.parse(listing.photos) : listing.photos}
         />
       </div>
     </main>

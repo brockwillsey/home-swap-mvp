@@ -70,7 +70,7 @@ export default async function ListingDetailPage({
   const userPoints = user?.points ?? 0;
 
   // Get user's homes for swap offers
-  const userHomes = await db.home.findMany({
+  const userHomesRaw = await db.home.findMany({
     where: {
       ownerId: session.user.id,
       isActive: true,
@@ -82,6 +82,12 @@ export default async function ListingDetailPage({
       photos: true,
     },
   });
+
+  // Parse photos from JSON string
+  const userHomes = userHomesRaw.map((home) => ({
+    ...home,
+    photos: typeof home.photos === "string" ? (JSON.parse(home.photos) as string[]) : home.photos,
+  }));
 
   const isOwnListing = listing.ownerId === session.user.id;
 

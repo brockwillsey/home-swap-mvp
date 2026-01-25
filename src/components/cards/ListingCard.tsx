@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { CldImage } from "next-cloudinary";
+import Image from "next/image";
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/components/ui/card";
 
@@ -45,12 +45,11 @@ export function ListingCard({
         {/* Photo */}
         <div className="relative aspect-[4/3] bg-muted">
           {photos.length > 0 ? (
-            <CldImage
+            <Image
               src={photos[0]!}
               alt={title}
               fill
               sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-              crop="fill"
               className="object-cover"
             />
           ) : (
@@ -104,14 +103,12 @@ export function ListingCard({
             {/* Host info */}
             <div className="flex items-center gap-2">
               {owner.image ? (
-                <CldImage
+                <Image
                   src={owner.image}
                   alt={owner.name ?? "Host"}
                   width={24}
                   height={24}
-                  crop="fill"
-                  gravity="face"
-                  className="rounded-full"
+                  className="rounded-full object-cover"
                 />
               ) : (
                 <div className="flex h-6 w-6 items-center justify-center rounded-full bg-primary/10 text-xs font-medium text-primary">

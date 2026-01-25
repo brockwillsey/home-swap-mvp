@@ -1,12 +1,12 @@
 "use client";
 
-import { useState } from "react";
-import { CldImage } from "next-cloudinary";
+import { useState, useMemo } from "react";
+import Image from "next/image";
 
 import { Button } from "~/components/ui/button";
 
 interface PhotoGalleryProps {
-  photos: string[];
+  photos: string[] | string;
   title: string;
 }
 
@@ -15,9 +15,21 @@ interface PhotoGalleryProps {
  *
  * Displays listing photos in a grid with lightbox functionality.
  */
-export function PhotoGallery({ photos, title }: PhotoGalleryProps) {
+export function PhotoGallery({ photos: photosInput, title }: PhotoGalleryProps) {
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [currentIndex, setCurrentIndex] = useState(0);
+
+  // Parse photos if it's a JSON string
+  const photos = useMemo(() => {
+    if (typeof photosInput === "string") {
+      try {
+        return JSON.parse(photosInput) as string[];
+      } catch {
+        return [];
+      }
+    }
+    return photosInput;
+  }, [photosInput]);
 
   if (photos.length === 0) {
     return (
@@ -83,12 +95,12 @@ export function PhotoGallery({ photos, title }: PhotoGalleryProps) {
             onClick={() => openLightbox(0)}
             className="relative aspect-[16/9] overflow-hidden"
           >
-            <CldImage
+            <Image
               src={photos[0]!}
               alt={title}
               fill
               sizes="100vw"
-              crop="fill"
+              
               className="object-cover transition-transform hover:scale-105"
             />
           </button>
@@ -102,12 +114,12 @@ export function PhotoGallery({ photos, title }: PhotoGalleryProps) {
                 onClick={() => openLightbox(index)}
                 className="relative aspect-[4/3] overflow-hidden"
               >
-                <CldImage
+                <Image
                   src={photo}
                   alt={`${title} - Photo ${index + 1}`}
                   fill
                   sizes="50vw"
-                  crop="fill"
+                  
                   className="object-cover transition-transform hover:scale-105"
                 />
               </button>
@@ -122,12 +134,12 @@ export function PhotoGallery({ photos, title }: PhotoGalleryProps) {
               onClick={() => openLightbox(0)}
               className="relative aspect-[4/3] overflow-hidden md:row-span-2"
             >
-              <CldImage
+              <Image
                 src={photos[0]!}
                 alt={title}
                 fill
                 sizes="(max-width: 768px) 100vw, 50vw"
-                crop="fill"
+                
                 className="object-cover transition-transform hover:scale-105"
               />
             </button>
@@ -141,12 +153,12 @@ export function PhotoGallery({ photos, title }: PhotoGalleryProps) {
                   onClick={() => openLightbox(index + 1)}
                   className="relative aspect-[4/3] overflow-hidden"
                 >
-                  <CldImage
+                  <Image
                     src={photo}
                     alt={`${title} - Photo ${index + 2}`}
                     fill
                     sizes="25vw"
-                    crop="fill"
+                    
                     className="object-cover transition-transform hover:scale-105"
                   />
                   {/* Show "View all" overlay on last visible photo if more exist */}
@@ -232,12 +244,12 @@ export function PhotoGallery({ photos, title }: PhotoGalleryProps) {
             className="relative max-h-[90vh] max-w-[90vw]"
             onClick={(e) => e.stopPropagation()}
           >
-            <CldImage
+            <Image
               src={photos[currentIndex]!}
               alt={`${title} - Photo ${currentIndex + 1}`}
               width={1200}
               height={800}
-              crop="fit"
+              
               className="max-h-[90vh] w-auto"
             />
           </div>
