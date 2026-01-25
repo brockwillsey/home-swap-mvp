@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import { CldUploadWidget, CldImage } from "next-cloudinary";
 import type { CloudinaryUploadWidgetResults } from "next-cloudinary";
 import {
@@ -85,6 +86,9 @@ function SortablePhoto({
     opacity: isDragging ? 0.8 : 1,
   };
 
+  // Check if it's a Cloudinary URL or external URL
+  const isCloudinaryUrl = photo.url.includes("cloudinary.com") || (photo.publicId && !photo.url.startsWith("http"));
+
   return (
     <div
       ref={setNodeRef}
@@ -93,14 +97,25 @@ function SortablePhoto({
         isPrimary ? "border-primary ring-2 ring-primary/20" : "border-transparent"
       } ${isDragging ? "shadow-xl" : ""}`}
     >
-      <CldImage
-        src={photo.url}
-        alt={`Listing photo ${index + 1}${isPrimary ? " (cover)" : ""}`}
-        fill
-        sizes="(max-width: 768px) 50vw, 33vw"
-        crop="fill"
-        className="object-cover"
-      />
+      {isCloudinaryUrl && isCloudinaryConfigured() ? (
+        <CldImage
+          src={photo.url}
+          alt={`Listing photo ${index + 1}${isPrimary ? " (cover)" : ""}`}
+          fill
+          sizes="(max-width: 768px) 50vw, 33vw"
+          crop="fill"
+          className="object-cover"
+        />
+      ) : (
+        <Image
+          src={photo.url}
+          alt={`Listing photo ${index + 1}${isPrimary ? " (cover)" : ""}`}
+          fill
+          sizes="(max-width: 768px) 50vw, 33vw"
+          className="object-cover"
+          unoptimized
+        />
+      )}
 
       {/* Drag handle overlay */}
       {!disabled && (
@@ -208,16 +223,7 @@ export function ListingPhotosUpload({
     })
   );
 
-  // Check if Cloudinary is configured
-  if (!isCloudinaryConfigured()) {
-    return (
-      <div className="rounded-lg border border-dashed border-destructive/50 bg-destructive/5 p-6 text-center">
-        <p className="text-sm text-destructive">
-          Cloudinary is not configured. Please set NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME in your environment.
-        </p>
-      </div>
-    );
-  }
+  const cloudinaryConfigured = isCloudinaryConfigured();
 
   function handleUploadSuccess(results: CloudinaryUploadWidgetResults) {
     setIsUploading(false);
@@ -363,8 +369,8 @@ export function ListingPhotosUpload({
         </p>
       )}
 
-      {/* Upload button */}
-      {photos.length < maxPhotos && (
+      {/* Upload button - only show if Cloudinary is configured */}
+      {photos.length < maxPhotos && cloudinaryConfigured && (
         <CldUploadWidget
           uploadPreset={CLOUDINARY_UPLOAD_PRESET_HOMES}
           options={{
@@ -432,6 +438,15 @@ export function ListingPhotosUpload({
             </Button>
           )}
         </CldUploadWidget>
+      )}
+
+      {/* Cloudinary not configured message */}
+      {photos.length < maxPhotos && !cloudinaryConfigured && (
+        <div className="rounded-lg border border-dashed border-amber-500/50 bg-amber-50/50 dark:bg-amber-950/20 p-4 text-center">
+          <p className="text-sm text-amber-700 dark:text-amber-400">
+            Photo uploads require Cloudinary configuration. Set NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME to enable uploads.
+          </p>
+        </div>
       )}
 
       {/* Max photos reached */}
