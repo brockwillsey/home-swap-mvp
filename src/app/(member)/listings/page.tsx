@@ -1,8 +1,8 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { CldImage } from "next-cloudinary";
 
 import { auth } from "~/server/auth";
+import { ListingImage } from "~/components/listing/ListingImage";
 import { db } from "~/server/db";
 import { MemberHeader } from "~/components/layout/MemberHeader";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/components/ui/card";
@@ -42,7 +42,7 @@ export default async function MyListingsPage() {
   }
 
   // Get all listings for this user with availability data
-  const listings = await db.home.findMany({
+  const listingsRaw = await db.home.findMany({
     where: { ownerId: session.user.id },
     orderBy: { createdAt: "desc" },
     include: {
@@ -55,6 +55,12 @@ export default async function MyListingsPage() {
       },
     },
   });
+
+  // Parse photos from JSON string
+  const listings = listingsRaw.map((listing) => ({
+    ...listing,
+    photos: JSON.parse(listing.photos) as string[],
+  }));
 
   return (
     <main className="min-h-screen bg-background">
@@ -104,12 +110,11 @@ export default async function MyListingsPage() {
                   {/* Photo */}
                   <div className="relative aspect-[4/3] bg-muted">
                     {listing.photos.length > 0 ? (
-                      <CldImage
+                      <ListingImage
                         src={listing.photos[0]!}
                         alt={listing.title}
                         fill
                         sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                        crop="fill"
                         className="object-cover"
                       />
                     ) : (
