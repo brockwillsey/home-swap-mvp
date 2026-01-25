@@ -101,17 +101,18 @@ model Application {
 }
 
 model Home {
-  id           String         @id @default(cuid())
-  ownerId      String
-  title        String
-  description  String?
-  location     String
-  photos       String         @default("[]") // JSON array of Cloudinary URLs
-  bookingMode  BookingMode    @default(REQUIRES_APPROVAL)
-  exchangeType ExchangeType   @default(BOTH)
-  isActive     Boolean        @default(true)
-  createdAt    DateTime       @default(now())
-  updatedAt    DateTime       @updatedAt
+  id                    String         @id @default(cuid())
+  ownerId               String
+  title                 String
+  description           String?
+  location              String
+  photos                String         @default("[]") // JSON array of Cloudinary URLs
+  bookingMode           BookingMode    @default(REQUIRES_APPROVAL)
+  exchangeType          ExchangeType   @default(BOTH)
+  preferredDestinations String         @default("[]") // JSON array of location strings
+  isActive              Boolean        @default(true)
+  createdAt             DateTime       @default(now())
+  updatedAt             DateTime       @updatedAt
 
   owner        User           @relation(fields: [ownerId], references: [id], onDelete: Cascade)
   availability Availability[]

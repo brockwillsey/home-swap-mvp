@@ -545,4 +545,55 @@ export const listingRouter = createTRPCRouter({
         success: true,
       };
     }),
+
+  /**
+   * Update listing preferred destinations
+   *
+   * Allows owners to specify where they'd like to travel/exchange to.
+   * Max 10 destinations, each max 100 characters.
+   */
+  updatePreferredDestinations: protectedProcedure
+    .input(
+      z.object({
+        id: z.string().min(1),
+        destinations: z
+          .array(z.string().min(1).max(100))
+          .max(10),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      const { id, destinations } = input;
+
+      // Verify ownership
+      const existing = await ctx.db.home.findUnique({
+        where: { id },
+        select: { ownerId: true },
+      });
+
+      if (!existing) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Listing not found",
+        });
+      }
+
+      if (existing.ownerId !== ctx.session.user.id) {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "You don't have permission to edit this listing",
+        });
+      }
+
+      // Store as JSON string
+      const listing = await ctx.db.home.update({
+        where: { id },
+        data: { preferredDestinations: JSON.stringify(destinations) },
+      });
+
+      return {
+        id: listing.id,
+        destinationCount: destinations.length,
+        success: true,
+      };
+    }),
 });

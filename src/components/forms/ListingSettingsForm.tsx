@@ -5,6 +5,7 @@ import { toast } from "sonner";
 
 import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/components/ui/card";
+import { Input } from "~/components/ui/input";
 import { api } from "~/trpc/react";
 
 type BookingMode = "INSTANT_BOOK" | "REQUIRES_APPROVAL";
@@ -14,6 +15,7 @@ interface ListingSettingsFormProps {
   listingId: string;
   initialBookingMode: BookingMode;
   initialExchangeType: ExchangeType;
+  initialPreferredDestinations: string[];
 }
 
 /**
@@ -26,9 +28,12 @@ export function ListingSettingsForm({
   listingId,
   initialBookingMode,
   initialExchangeType,
+  initialPreferredDestinations,
 }: ListingSettingsFormProps) {
   const [bookingMode, setBookingMode] = useState<BookingMode>(initialBookingMode);
   const [exchangeType, setExchangeType] = useState<ExchangeType>(initialExchangeType);
+  const [destinations, setDestinations] = useState<string[]>(initialPreferredDestinations);
+  const [newDestination, setNewDestination] = useState("");
 
   const updateBookingMode = api.listing.updateBookingMode.useMutation({
     onSuccess: () => {
@@ -52,6 +57,17 @@ export function ListingSettingsForm({
     },
   });
 
+  const updatePreferredDestinations = api.listing.updatePreferredDestinations.useMutation({
+    onSuccess: () => {
+      toast.success("Preferred destinations updated");
+    },
+    onError: (error) => {
+      toast.error(error.message);
+      // Revert on error
+      setDestinations(initialPreferredDestinations);
+    },
+  });
+
   function handleBookingModeChange(mode: BookingMode) {
     setBookingMode(mode);
     updateBookingMode.mutate({ id: listingId, bookingMode: mode });
@@ -62,7 +78,34 @@ export function ListingSettingsForm({
     updateExchangeType.mutate({ id: listingId, exchangeType: type });
   }
 
-  const isUpdating = updateBookingMode.isPending || updateExchangeType.isPending;
+  function handleAddDestination() {
+    const trimmed = newDestination.trim();
+    if (!trimmed) return;
+    if (destinations.length >= 10) {
+      toast.error("Maximum 10 destinations allowed");
+      return;
+    }
+    if (destinations.includes(trimmed)) {
+      toast.error("Destination already added");
+      return;
+    }
+    if (trimmed.length > 100) {
+      toast.error("Destination must be 100 characters or less");
+      return;
+    }
+    const updated = [...destinations, trimmed];
+    setDestinations(updated);
+    setNewDestination("");
+    updatePreferredDestinations.mutate({ id: listingId, destinations: updated });
+  }
+
+  function handleRemoveDestination(destination: string) {
+    const updated = destinations.filter((d) => d !== destination);
+    setDestinations(updated);
+    updatePreferredDestinations.mutate({ id: listingId, destinations: updated });
+  }
+
+  const isUpdating = updateBookingMode.isPending || updateExchangeType.isPending || updatePreferredDestinations.isPending;
 
   return (
     <div className="space-y-6">
@@ -284,6 +327,107 @@ export function ListingSettingsForm({
               </p>
             </button>
           </div>
+        </CardContent>
+      </Card>
+
+      {/* Preferred Destinations Section */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Preferred Destinations</CardTitle>
+          <CardDescription>
+            Where would you like to travel? Adding destinations helps potential swappers identify mutual matches.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {/* Add destination input */}
+          <div className="flex gap-2">
+            <Input
+              type="text"
+              placeholder="e.g., Paris, France"
+              value={newDestination}
+              onChange={(e) => setNewDestination(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  handleAddDestination();
+                }
+              }}
+              disabled={isUpdating || destinations.length >= 10}
+              maxLength={100}
+              className="flex-1"
+            />
+            <Button
+              type="button"
+              onClick={handleAddDestination}
+              disabled={isUpdating || !newDestination.trim() || destinations.length >= 10}
+              variant="secondary"
+            >
+              Add
+            </Button>
+          </div>
+
+          {/* Destination tags */}
+          {destinations.length > 0 ? (
+            <div className="flex flex-wrap gap-2">
+              {destinations.map((destination) => (
+                <span
+                  key={destination}
+                  className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-3 py-1 text-sm text-primary"
+                >
+                  <svg
+                    className="h-3.5 w-3.5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
+                    />
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
+                    />
+                  </svg>
+                  {destination}
+                  <button
+                    type="button"
+                    onClick={() => handleRemoveDestination(destination)}
+                    disabled={isUpdating}
+                    className="ml-1 rounded-full p-0.5 hover:bg-primary/20"
+                    aria-label={`Remove ${destination}`}
+                  >
+                    <svg
+                      className="h-3.5 w-3.5"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M6 18L18 6M6 6l12 12"
+                      />
+                    </svg>
+                  </button>
+                </span>
+              ))}
+            </div>
+          ) : (
+            <p className="text-sm text-muted-foreground">
+              No destinations added yet. Add places you&apos;d like to visit!
+            </p>
+          )}
+
+          {/* Character count hint */}
+          <p className="text-xs text-muted-foreground">
+            {destinations.length}/10 destinations
+          </p>
         </CardContent>
       </Card>
     </div>

@@ -45,6 +45,9 @@ export default async function ListingSettingsPage({
     select: { name: true },
   });
 
+  // Parse preferredDestinations from JSON string
+  const preferredDestinations = JSON.parse(listing.preferredDestinations) as string[];
+
   return (
     <main className="min-h-screen bg-background">
       <MemberHeader userName={user?.name} />
@@ -84,6 +87,7 @@ export default async function ListingSettingsPage({
             listingId={listing.id}
             initialBookingMode={listing.bookingMode}
             initialExchangeType={listing.exchangeType}
+            initialPreferredDestinations={preferredDestinations}
           />
         </div>
       </div>
