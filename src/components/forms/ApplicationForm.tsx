@@ -42,7 +42,7 @@ export function ApplicationForm() {
       email: "",
       bio: "",
       location: "",
-      creativeInterests: [],
+      studioGalleryReferral: "",
       reasonForJoining: "",
       profilePhotoUrl: "",
       homePhotos: [],
@@ -66,19 +66,7 @@ export function ApplicationForm() {
 
   async function onSubmit(data: ApplicationFormData) {
     setSubmitError(null);
-    // Transform membership roles array to human-readable string for storage
-    const roleLabels: Record<string, string> = {
-      HOME_OWNER: "Home Owner",
-      ARTIST: "Artist",
-      ARTIST_SPONSOR: "Artists Sponsor",
-    };
-    const transformedData = {
-      ...data,
-      creativeInterests: (data.creativeInterests as unknown as string[])
-        .map((role) => roleLabels[role] ?? role)
-        .join(", "),
-    };
-    createApplication.mutate(transformedData as unknown as ApplicationFormData);
+    createApplication.mutate(data);
   }
 
   const isSubmitting = createApplication.isPending;
@@ -218,50 +206,24 @@ export function ApplicationForm() {
               )}
             />
 
-            {/* Membership Roles */}
+            {/* Studio/Gallery Referral */}
             <FormField
               control={form.control}
-              name="creativeInterests"
+              name="studioGalleryReferral"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Art Residency Home Exchange Membership Role *</FormLabel>
-                  <FormDescription className="mb-3">
-                    Select all roles that apply to you.
-                  </FormDescription>
+                  <FormLabel>Studio or Gallery Referral *</FormLabel>
                   <FormControl>
-                    <div className="space-y-3">
-                      {[
-                        { value: "HOME_OWNER", label: "Home Owner" },
-                        { value: "ARTIST", label: "Artist" },
-                        { value: "ARTIST_SPONSOR", label: "Artists Sponsor (home or donation)" },
-                      ].map((role) => (
-                        <label
-                          key={role.value}
-                          className={`flex cursor-pointer items-center gap-3 rounded-lg border p-4 transition-colors ${
-                            (field.value as unknown as string[])?.includes(role.value)
-                              ? "border-primary bg-primary/5"
-                              : "border-border hover:border-primary/50"
-                          } ${isSubmitting ? "cursor-not-allowed opacity-50" : ""}`}
-                        >
-                          <input
-                            type="checkbox"
-                            checked={(field.value as unknown as string[])?.includes(role.value) ?? false}
-                            onChange={(e) => {
-                              const currentValues = (field.value as unknown as string[]) ?? [];
-                              if (e.target.checked) {
-                                field.onChange([...currentValues, role.value]);
-                              } else {
-                                field.onChange(currentValues.filter((v) => v !== role.value));
-                              }
-                            }}
-                            disabled={isSubmitting}
-                            className="h-5 w-5 rounded border-gray-300 text-primary focus:ring-primary"
-                          />
-                          <span className="text-sm font-medium">{role.label}</span>
-                        </label>
-                      ))}
-                    </div>
+                    <Textarea
+                      placeholder="Is there a studio or gallery close to your place that might be interested in being part of the Art Res community? If so, please share their name and any contact information you have."
+                      className="min-h-[100px] resize-y"
+                      disabled={isSubmitting}
+                      {...field}
+                    />
                   </FormControl>
+                  <FormDescription>
+                    Help us grow our community by sharing nearby creative spaces that might want to join.
+                  </FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
