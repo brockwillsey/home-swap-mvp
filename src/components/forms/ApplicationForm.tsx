@@ -154,7 +154,7 @@ export function ApplicationForm() {
                         {
                           value: "SPONSOR" as const,
                           label: "I want to sponsor artists",
-                          description: "Support artists with funding or housing",
+                          description: "Support artists with financial contributions",
                         },
                       ].map((role) => (
                         <label
