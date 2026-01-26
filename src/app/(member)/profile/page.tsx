@@ -32,7 +32,7 @@ export default async function ProfilePage() {
           status: true,
           bio: true,
           location: true,
-          creativeInterests: true,
+          roles: true,
           profilePhotoUrl: true,
           reviewedAt: true,
         },
@@ -66,7 +66,7 @@ export default async function ProfilePage() {
     image: user.image ?? user.application?.profilePhotoUrl,
     bio: user.bio ?? user.application?.bio,
     location: user.location ?? user.application?.location,
-    creativeInterests: user.creativeInterests ?? user.application?.creativeInterests,
+    roles: user.creativeInterests ?? user.application?.roles,
     createdAt: user.createdAt,
     points: user.points,
   };
@@ -175,15 +175,24 @@ export default async function ProfilePage() {
                 </p>
               </div>
 
-              {/* Creative Interests */}
+              {/* Membership Roles */}
               <div>
                 <h3 className="mb-2 text-sm font-medium text-muted-foreground">
-                  Creative Interests
+                  Membership Type
                 </h3>
                 <p className="text-foreground">
-                  {profileData.creativeInterests ?? (
+                  {profileData.roles ? (
+                    (() => {
+                      try {
+                        const roles = JSON.parse(profileData.roles) as string[];
+                        return roles.map(r => r.replace(/_/g, ' ').toLowerCase().replace(/\b\w/g, c => c.toUpperCase())).join(', ');
+                      } catch {
+                        return profileData.roles;
+                      }
+                    })()
+                  ) : (
                     <span className="italic text-muted-foreground">
-                      No creative interests added yet
+                      No membership type set
                     </span>
                   )}
                 </p>

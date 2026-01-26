@@ -30,7 +30,7 @@ export const profileRouter = createTRPCRouter({
             status: true,
             bio: true,
             location: true,
-            creativeInterests: true,
+            roles: true,
             profilePhotoUrl: true,
           },
         },
@@ -63,7 +63,7 @@ export const profileRouter = createTRPCRouter({
             bio: user.bio ?? user.application.bio,
             location: user.location ?? user.application.location,
             creativeInterests:
-              user.creativeInterests ?? user.application.creativeInterests,
+              user.creativeInterests ?? user.application.roles,
             image: user.image ?? user.application.profilePhotoUrl,
           },
         });
@@ -201,7 +201,7 @@ export const profileRouter = createTRPCRouter({
               status: true,
               bio: true,
               location: true,
-              creativeInterests: true,
+              roles: true,
               profilePhotoUrl: true,
             },
           },
@@ -230,7 +230,7 @@ export const profileRouter = createTRPCRouter({
         image: member.image ?? member.application?.profilePhotoUrl,
         bio: member.bio ?? member.application?.bio,
         location: member.location ?? member.application?.location,
-        creativeInterests: member.creativeInterests ?? member.application?.creativeInterests,
+        creativeInterests: member.creativeInterests ?? member.application?.roles,
         createdAt: member.createdAt,
         // Home listings will be added in Epic 2
         homes: [],

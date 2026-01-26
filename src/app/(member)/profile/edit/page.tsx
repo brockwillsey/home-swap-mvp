@@ -28,7 +28,7 @@ export default async function ProfileEditPage() {
           status: true,
           bio: true,
           location: true,
-          creativeInterests: true,
+          roles: true,
           profilePhotoUrl: true,
         },
       },
@@ -54,7 +54,7 @@ export default async function ProfileEditPage() {
     bio: user.bio ?? user.application?.bio ?? "",
     location: user.location ?? user.application?.location ?? "",
     creativeInterests:
-      user.creativeInterests ?? user.application?.creativeInterests ?? "",
+      user.creativeInterests ?? user.application?.roles ?? "",
   };
 
   return (

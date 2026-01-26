@@ -256,14 +256,14 @@ export async function sendNewApplicationNotificationEmail({
   applicantName,
   applicantEmail,
   location,
-  creativeInterests,
+  roles,
   applicationId,
 }: {
   adminEmail: string;
   applicantName: string;
   applicantEmail: string;
   location: string;
-  creativeInterests: string;
+  roles: string;
   applicationId: string;
 }): Promise<void> {
   if (!resend) {
@@ -303,7 +303,7 @@ export async function sendNewApplicationNotificationEmail({
           <p style="margin: 0 0 12px;"><strong>Name:</strong> ${escapeHtml(applicantName)}</p>
           <p style="margin: 0 0 12px;"><strong>Email:</strong> ${escapeHtml(applicantEmail)}</p>
           <p style="margin: 0 0 12px;"><strong>Location:</strong> ${escapeHtml(location)}</p>
-          <p style="margin: 0;"><strong>Creative Interests:</strong> ${escapeHtml(creativeInterests)}</p>
+          <p style="margin: 0;"><strong>Membership Roles:</strong> ${escapeHtml(roles)}</p>
         </div>
 
         <div style="text-align: center;">
@@ -332,7 +332,7 @@ APPLICANT DETAILS
 Name: ${applicantName}
 Email: ${applicantEmail}
 Location: ${location}
-Creative Interests: ${creativeInterests}
+Membership Roles: ${roles}
 
 Review the application at: ${adminUrl}
 

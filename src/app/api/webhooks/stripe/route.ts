@@ -164,7 +164,7 @@ async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session) 
         applicantName: application.user.name ?? "Unknown",
         applicantEmail: application.user.email ?? "Unknown",
         location: application.location,
-        creativeInterests: application.creativeInterests,
+        roles: application.roles,
         applicationId: application.id,
       });
       console.log(`Admin notification sent to ${env.ADMIN_EMAIL}`);

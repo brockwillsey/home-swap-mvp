@@ -174,13 +174,44 @@ export function ApplicationDetail({ applicationId }: ApplicationDetailProps) {
               <p className="whitespace-pre-wrap">{application.bio}</p>
             </div>
 
-            {/* Creative Interests */}
+            {/* Membership Roles */}
             <div>
               <h3 className="mb-2 text-sm font-medium text-muted-foreground">
-                Creative Interests
+                Membership Roles
               </h3>
-              <p>{application.creativeInterests}</p>
+              <p>
+                {(() => {
+                  try {
+                    const roles = JSON.parse(application.roles) as string[];
+                    return roles.map(r => r.replace(/_/g, ' ').toLowerCase().replace(/\b\w/g, c => c.toUpperCase())).join(', ');
+                  } catch {
+                    return application.roles;
+                  }
+                })()}
+              </p>
             </div>
+
+            {/* Portfolio URL - for artists */}
+            {application.portfolioUrl && (
+              <div>
+                <h3 className="mb-2 text-sm font-medium text-muted-foreground">
+                  Portfolio
+                </h3>
+                <a href={application.portfolioUrl} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
+                  {application.portfolioUrl}
+                </a>
+              </div>
+            )}
+
+            {/* Studio/Gallery Referral */}
+            {application.studioGalleryReferral && (
+              <div>
+                <h3 className="mb-2 text-sm font-medium text-muted-foreground">
+                  Studio/Gallery Referral
+                </h3>
+                <p className="whitespace-pre-wrap">{application.studioGalleryReferral}</p>
+              </div>
+            )}
 
             {/* Reason for Joining */}
             <div>

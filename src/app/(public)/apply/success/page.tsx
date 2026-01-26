@@ -1,6 +1,5 @@
 import { Suspense } from "react";
 import Link from "next/link";
-import { redirect } from "next/navigation";
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/components/ui/card";
 import { Button } from "~/components/ui/button";
@@ -11,8 +10,9 @@ import { RefreshButton } from "./RefreshButton";
 /**
  * Application Success Page
  *
- * Shown after successful payment.
- * Application status is now SUBMITTED and under review.
+ * Shown after successful application submission.
+ * - For paid applications (artists/home owners): After payment confirmation
+ * - For free applications (sponsors): Immediately after form submission
  * Verifies application status server-side to prevent false success display.
  */
 
@@ -22,27 +22,63 @@ import { RefreshButton } from "./RefreshButton";
 async function SuccessContentServer() {
   const session = await auth();
 
-  // Check if user is authenticated and has a paid application
-  let isPaid = false;
+  // Check if user is authenticated and has an application
+  let applicationData: { isPaid: boolean; membershipFee: number; isSponsorOnly: boolean } | null = null;
+
   if (session?.user?.id) {
     const application = await db.application.findUnique({
       where: { userId: session.user.id },
-      select: { status: true, stripePaymentId: true },
+      select: { status: true, stripePaymentId: true, membershipFee: true, roles: true },
     });
-    // Consider paid if status is SUBMITTED or APPROVED, or has stripePaymentId
-    isPaid = !!(
-      application?.stripePaymentId ||
-      application?.status === "SUBMITTED" ||
-      application?.status === "APPROVED"
-    );
+
+    if (application) {
+      const isSponsorOnly = application.membershipFee === 0;
+      // Consider paid if:
+      // - It's a free sponsor application (no payment needed), OR
+      // - Has stripePaymentId, OR
+      // - Status is SUBMITTED or APPROVED
+      const isPaid = !!(
+        isSponsorOnly ||
+        application.stripePaymentId ||
+        application.status === "SUBMITTED" ||
+        application.status === "APPROVED"
+      );
+
+      applicationData = {
+        isPaid,
+        membershipFee: application.membershipFee,
+        isSponsorOnly,
+      };
+    }
   }
 
-  return <SuccessContent isPaid={isPaid} />;
+  // If no application found, check for sponsor submission without session
+  // (sponsors might not have signed in yet)
+  if (!applicationData) {
+    // Show a generic success for sponsors who submitted without signing in
+    return <SuccessContent isPaid={true} membershipFee={0} isSponsorOnly={true} />;
+  }
+
+  return (
+    <SuccessContent
+      isPaid={applicationData.isPaid}
+      membershipFee={applicationData.membershipFee}
+      isSponsorOnly={applicationData.isSponsorOnly}
+    />
+  );
 }
 
-function SuccessContent({ isPaid }: { isPaid: boolean }) {
-  // If not paid, show a processing message
-  if (!isPaid) {
+function SuccessContent({
+  isPaid,
+  membershipFee,
+  isSponsorOnly,
+}: {
+  isPaid: boolean;
+  membershipFee: number;
+  isSponsorOnly: boolean;
+}) {
+  // If not paid and requires payment, show processing message
+  if (!isPaid && membershipFee > 0) {
     return (
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
@@ -84,6 +120,7 @@ function SuccessContent({ isPaid }: { isPaid: boolean }) {
     );
   }
 
+  // Success view - for both paid applications and free sponsor applications
   return (
     <Card className="w-full max-w-md">
       <CardHeader className="text-center">
@@ -111,13 +148,22 @@ function SuccessContent({ isPaid }: { isPaid: boolean }) {
       </CardHeader>
 
       <CardContent className="space-y-6">
-        {/* Payment confirmation */}
-        <div className="rounded-lg border border-green-500/20 bg-green-500/5 p-4 text-center">
-          <p className="font-medium text-green-700">Payment Successful</p>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Your $300 membership fee has been received
-          </p>
-        </div>
+        {/* Payment/Free confirmation */}
+        {isSponsorOnly ? (
+          <div className="rounded-lg border border-green-500/20 bg-green-500/5 p-4 text-center">
+            <p className="font-medium text-green-700">Sponsor Application Received</p>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Thank you for wanting to support our artist community!
+            </p>
+          </div>
+        ) : (
+          <div className="rounded-lg border border-green-500/20 bg-green-500/5 p-4 text-center">
+            <p className="font-medium text-green-700">Payment Successful</p>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Your ${membershipFee} membership fee has been received
+            </p>
+          </div>
+        )}
 
         {/* Status message */}
         <div className="rounded-lg bg-muted p-4 text-sm text-muted-foreground">
@@ -126,16 +172,24 @@ function SuccessContent({ isPaid }: { isPaid: boolean }) {
           </p>
           <ol className="list-inside list-decimal space-y-2">
             <li>Our team will review your application within 3-5 business days</li>
-            <li>We&apos;ll check your profile, home photos, and creative background</li>
+            {!isSponsorOnly && (
+              <li>We&apos;ll check your profile, photos, and background</li>
+            )}
             <li>You&apos;ll receive an email with our decision</li>
-            <li>If approved, you can start using Art Res immediately</li>
+            <li>
+              {isSponsorOnly
+                ? "If approved, you can start supporting artists immediately"
+                : "If approved, you can start using Art Res immediately"}
+            </li>
           </ol>
         </div>
 
-        {/* Refund note */}
-        <p className="text-center text-xs text-muted-foreground">
-          If your application is not approved, you&apos;ll receive a full refund automatically.
-        </p>
+        {/* Refund note - only for paid applications */}
+        {!isSponsorOnly && (
+          <p className="text-center text-xs text-muted-foreground">
+            If your application is not approved, you&apos;ll receive a full refund automatically.
+          </p>
+        )}
 
         {/* Confirmation email note */}
         <div className="rounded-lg bg-primary/5 p-4 text-center text-sm">

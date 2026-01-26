@@ -11,7 +11,7 @@ import { Prisma } from "@prisma/client";
 import { z } from "zod";
 
 import { createTRPCRouter, publicProcedure, rateLimitedProcedure, adminProcedure } from "~/server/api/trpc";
-import { applicationFormSchema } from "~/lib/validations/application";
+import { applicationFormSchema, calculateMembershipFee, type MembershipRoleType } from "~/lib/validations/application";
 import { createRefund } from "~/lib/services/stripe";
 import {
   sendWelcomeEmail,
@@ -52,7 +52,10 @@ export const applicationRouter = createTRPCRouter({
   create: rateLimitedProcedure
     .input(applicationFormSchema)
     .mutation(async ({ ctx, input }) => {
-      const { email, name, bio, location, studioGalleryReferral, reasonForJoining, profilePhotoUrl, homePhotos } = input;
+      const { roles, email, name, bio, location, portfolioUrl, studioGalleryReferral, reasonForJoining, profilePhotoUrl, homePhotos } = input;
+
+      // Calculate membership fee based on roles
+      const membershipFee = calculateMembershipFee(roles as MembershipRoleType[]);
 
       try {
         // Check if user already exists
@@ -85,12 +88,15 @@ export const applicationRouter = createTRPCRouter({
               where: { userId: existingUser.id },
               data: {
                 status: "PENDING",
+                roles: JSON.stringify(roles),
                 bio,
                 location,
-                creativeInterests: studioGalleryReferral,
+                portfolioUrl: portfolioUrl || null,
+                studioGalleryReferral,
                 reasonForJoining,
                 profilePhotoUrl,
-                homePhotos: JSON.stringify(homePhotos),
+                homePhotos: JSON.stringify(homePhotos ?? []),
+                membershipFee,
                 feedback: null, // Clear previous feedback
                 stripePaymentId: null, // Clear previous payment ID for new application
                 reviewedAt: null, // Clear previous review timestamp
@@ -133,12 +139,15 @@ export const applicationRouter = createTRPCRouter({
             data: {
               userId: user.id,
               status: "PENDING",
+              roles: JSON.stringify(roles),
               bio,
               location,
-              creativeInterests: studioGalleryReferral,
+              portfolioUrl: portfolioUrl || null,
+              studioGalleryReferral,
               reasonForJoining,
               profilePhotoUrl,
-              homePhotos: JSON.stringify(homePhotos),
+              homePhotos: JSON.stringify(homePhotos ?? []),
+              membershipFee,
             },
           });
         });
@@ -177,7 +186,7 @@ export const applicationRouter = createTRPCRouter({
    * Useful for checking if user already has an application
    */
   getByEmail: publicProcedure
-    .input(applicationFormSchema.pick({ email: true }))
+    .input(z.object({ email: z.string().email() }))
     .query(async ({ ctx, input }) => {
       const user = await ctx.db.user.findUnique({
         where: { email: input.email },
@@ -340,7 +349,7 @@ export const applicationRouter = createTRPCRouter({
           data: {
             bio: application.bio,
             location: application.location,
-            creativeInterests: application.creativeInterests,
+            creativeInterests: application.roles, // Store roles in creativeInterests field
             image: application.profilePhotoUrl,
           },
         }),
@@ -526,12 +535,15 @@ export const applicationRouter = createTRPCRouter({
         id: application.id,
         user: application.user,
         status: application.status,
+        roles: application.roles,
         bio: application.bio,
         location: application.location,
-        creativeInterests: application.creativeInterests,
+        portfolioUrl: application.portfolioUrl,
+        studioGalleryReferral: application.studioGalleryReferral,
         reasonForJoining: application.reasonForJoining,
         profilePhotoUrl: application.profilePhotoUrl,
         homePhotos: application.homePhotos,
+        membershipFee: application.membershipFee,
         feedback: application.feedback,
         stripePaymentId: application.stripePaymentId,
         createdAt: application.createdAt,

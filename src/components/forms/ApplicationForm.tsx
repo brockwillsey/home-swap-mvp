@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
 
@@ -20,13 +20,22 @@ import {
 } from "~/components/ui/form";
 import { ProfilePhotoUpload } from "./ProfilePhotoUpload";
 import { HomePhotosUpload } from "./HomePhotosUpload";
-import { applicationFormSchema, type ApplicationFormData } from "~/lib/validations/application";
+import {
+  applicationFormSchema,
+  calculateMembershipFee,
+  type ApplicationFormData,
+  type MembershipRoleType,
+} from "~/lib/validations/application";
 import { api } from "~/trpc/react";
 
 /**
  * Application Form Component
  *
- * Membership application form for Art Res.
+ * Membership application form for Art Res with role-based pricing.
+ * - Artist with home: $300
+ * - Artist without home: $150
+ * - Sponsor only: Free
+ *
  * Uses React Hook Form + Zod validation.
  * Submits via tRPC mutation.
  */
@@ -38,10 +47,12 @@ export function ApplicationForm() {
   const form = useForm<ApplicationFormData>({
     resolver: zodResolver(applicationFormSchema),
     defaultValues: {
+      roles: [],
       name: "",
       email: "",
       bio: "",
       location: "",
+      portfolioUrl: "",
       studioGalleryReferral: "",
       reasonForJoining: "",
       profilePhotoUrl: "",
@@ -49,14 +60,29 @@ export function ApplicationForm() {
     },
   });
 
+  // Watch roles to show/hide conditional fields and calculate fee
+  const selectedRoles = useWatch({ control: form.control, name: "roles" }) as MembershipRoleType[];
+  const isArtist = selectedRoles?.includes("ARTIST") ?? false;
+  const isHomeOwner = selectedRoles?.includes("HOME_OWNER") ?? false;
+  const isSponsorOnly = selectedRoles?.length === 1 && selectedRoles[0] === "SPONSOR";
+  const membershipFee = calculateMembershipFee(selectedRoles ?? []);
+
   const createApplication = api.application.create.useMutation({
     onSuccess: (data, variables) => {
       setSubmitSuccess(true);
       setSubmitError(null);
-      // Redirect to sign-in page with callback to payment
-      // User signs in with the email they provided, then completes payment
-      const encodedEmail = encodeURIComponent(variables.email);
-      router.push(`/auth/signin?callbackUrl=/apply/payment&email=${encodedEmail}`);
+
+      // Calculate fee for redirect logic
+      const fee = calculateMembershipFee(variables.roles as MembershipRoleType[]);
+
+      if (fee === 0) {
+        // Sponsor only - skip payment, go directly to success/pending page
+        router.push("/apply/success");
+      } else {
+        // Redirect to sign-in page with callback to payment
+        const encodedEmail = encodeURIComponent(variables.email);
+        router.push(`/auth/signin?callbackUrl=/apply/payment&email=${encodedEmail}`);
+      }
     },
     onError: (error) => {
       setSubmitError(error.message);
@@ -85,7 +111,11 @@ export function ApplicationForm() {
         {submitSuccess && (
           <div className="mb-6 rounded-lg bg-green-500/10 p-4 text-center text-green-700 dark:text-green-400">
             <p className="font-medium">Application saved successfully!</p>
-            <p className="mt-1 text-sm">Redirecting to sign in and complete payment...</p>
+            <p className="mt-1 text-sm">
+              {membershipFee > 0
+                ? "Redirecting to sign in and complete payment..."
+                : "Redirecting to confirmation..."}
+            </p>
           </div>
         )}
 
@@ -98,6 +128,89 @@ export function ApplicationForm() {
 
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+            {/* Role Selection */}
+            <FormField
+              control={form.control}
+              name="roles"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>How would you like to participate? *</FormLabel>
+                  <FormDescription className="mb-3">
+                    Select all that apply to you.
+                  </FormDescription>
+                  <FormControl>
+                    <div className="space-y-3">
+                      {[
+                        {
+                          value: "ARTIST" as const,
+                          label: "I'm an artist seeking residencies",
+                          description: "Browse and apply for artist residencies",
+                        },
+                        {
+                          value: "HOME_OWNER" as const,
+                          label: "I have a home to list",
+                          description: "List your home for exchanges or artist stays",
+                        },
+                        {
+                          value: "SPONSOR" as const,
+                          label: "I want to sponsor artists",
+                          description: "Support artists with funding or housing",
+                        },
+                      ].map((role) => (
+                        <label
+                          key={role.value}
+                          className={`flex cursor-pointer items-start gap-3 rounded-lg border p-4 transition-colors ${
+                            (field.value as string[])?.includes(role.value)
+                              ? "border-primary bg-primary/5"
+                              : "border-border hover:border-primary/50"
+                          } ${isSubmitting ? "cursor-not-allowed opacity-50" : ""}`}
+                        >
+                          <input
+                            type="checkbox"
+                            checked={(field.value as string[])?.includes(role.value) ?? false}
+                            onChange={(e) => {
+                              const currentValues = (field.value as string[]) ?? [];
+                              if (e.target.checked) {
+                                field.onChange([...currentValues, role.value]);
+                              } else {
+                                field.onChange(currentValues.filter((v) => v !== role.value));
+                              }
+                            }}
+                            disabled={isSubmitting}
+                            className="mt-1 h-5 w-5 rounded border-gray-300 text-primary focus:ring-primary"
+                          />
+                          <div>
+                            <span className="font-medium">{role.label}</span>
+                            <p className="text-sm text-muted-foreground">{role.description}</p>
+                          </div>
+                        </label>
+                      ))}
+                    </div>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            {/* Membership Fee Display */}
+            {selectedRoles?.length > 0 && (
+              <div className="rounded-lg border border-primary/20 bg-primary/5 p-4">
+                <div className="flex items-center justify-between">
+                  <span className="font-medium">Membership Fee:</span>
+                  <span className="text-xl font-bold">
+                    {membershipFee === 0 ? "Free" : `$${membershipFee}/year`}
+                  </span>
+                </div>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  {isHomeOwner
+                    ? "Full membership with home exchange benefits"
+                    : isArtist
+                    ? "Artist membership with residency access"
+                    : "Sponsor membership - support our artist community"}
+                </p>
+              </div>
+            )}
+
             {/* Profile Photo */}
             <FormField
               control={form.control}
@@ -206,6 +319,55 @@ export function ApplicationForm() {
               )}
             />
 
+            {/* Portfolio URL - Only for Artists */}
+            {isArtist && (
+              <FormField
+                control={form.control}
+                name="portfolioUrl"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Portfolio or Work Samples *</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="url"
+                        placeholder="https://yourportfolio.com or Instagram/Behance link"
+                        disabled={isSubmitting}
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormDescription>
+                      Link to your portfolio, website, Instagram, or Behance profile.
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            )}
+
+            {/* Home Photos - Only for Home Owners */}
+            {isHomeOwner && (
+              <FormField
+                control={form.control}
+                name="homePhotos"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Your Home *</FormLabel>
+                    <FormControl>
+                      <HomePhotosUpload
+                        value={field.value ?? []}
+                        onChange={field.onChange}
+                        disabled={isSubmitting}
+                      />
+                    </FormControl>
+                    <FormDescription>
+                      Upload at least 3 photos of your home. This helps admins assess your property for our community.
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            )}
+
             {/* Studio/Gallery Referral */}
             <FormField
               control={form.control}
@@ -223,28 +385,6 @@ export function ApplicationForm() {
                   </FormControl>
                   <FormDescription>
                     Help us grow our community by sharing nearby creative spaces that might want to join.
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            {/* Home Photos */}
-            <FormField
-              control={form.control}
-              name="homePhotos"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Your Home *</FormLabel>
-                  <FormControl>
-                    <HomePhotosUpload
-                      value={field.value}
-                      onChange={field.onChange}
-                      disabled={isSubmitting}
-                    />
-                  </FormControl>
-                  <FormDescription>
-                    Upload at least 3 photos of your home. This helps admins assess your property for our community.
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
@@ -279,7 +419,7 @@ export function ApplicationForm() {
               type="submit"
               className="w-full"
               size="lg"
-              disabled={isSubmitting}
+              disabled={isSubmitting || !selectedRoles?.length}
             >
               {isSubmitting ? (
                 <>
@@ -294,7 +434,9 @@ export function ApplicationForm() {
             {/* Footer note */}
             <p className="text-center text-xs text-muted-foreground">
               By submitting, you agree to our Terms of Service and Privacy Policy.
-              After submission, you&apos;ll complete the $300 annual membership payment.
+              {membershipFee > 0 && (
+                <> After submission, you&apos;ll complete the ${membershipFee} annual membership payment.</>
+              )}
             </p>
           </form>
         </Form>

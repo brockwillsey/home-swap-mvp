@@ -50,7 +50,7 @@ export default async function MemberProfilePage({ params }: MemberProfilePagePro
           status: true,
           bio: true,
           location: true,
-          creativeInterests: true,
+          roles: true,
           profilePhotoUrl: true,
         },
       },
@@ -68,7 +68,7 @@ export default async function MemberProfilePage({ params }: MemberProfilePagePro
     image: member.image ?? member.application?.profilePhotoUrl,
     bio: member.bio ?? member.application?.bio,
     location: member.location ?? member.application?.location,
-    creativeInterests: member.creativeInterests ?? member.application?.creativeInterests,
+    roles: member.creativeInterests ?? member.application?.roles,
     createdAt: member.createdAt,
   };
 
@@ -191,15 +191,24 @@ export default async function MemberProfilePage({ params }: MemberProfilePagePro
                 </p>
               </div>
 
-              {/* Creative Interests */}
+              {/* Membership Roles */}
               <div>
                 <h3 className="mb-2 text-sm font-medium text-muted-foreground">
-                  Creative Interests
+                  Membership Type
                 </h3>
                 <p className="text-foreground">
-                  {profileData.creativeInterests ?? (
+                  {profileData.roles ? (
+                    (() => {
+                      try {
+                        const roles = JSON.parse(profileData.roles) as string[];
+                        return roles.map(r => r.replace(/_/g, ' ').toLowerCase().replace(/\b\w/g, c => c.toUpperCase())).join(', ');
+                      } catch {
+                        return profileData.roles;
+                      }
+                    })()
+                  ) : (
                     <span className="italic text-muted-foreground">
-                      No creative interests added yet
+                      No membership type set
                     </span>
                   )}
                 </p>
