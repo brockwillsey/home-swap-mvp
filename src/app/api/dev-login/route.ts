@@ -35,11 +35,16 @@ export async function GET(request: Request) {
   });
 
   // Set the session cookie
+  // In production (HTTPS), NextAuth uses __Secure- prefix
+  const isProduction = process.env.NODE_ENV === "production" || request.url.startsWith("https");
+  const cookieName = isProduction ? "__Secure-authjs.session-token" : "authjs.session-token";
+
   const cookieStore = await cookies();
-  cookieStore.set("authjs.session-token", sessionToken, {
+  cookieStore.set(cookieName, sessionToken, {
     expires,
     httpOnly: true,
     sameSite: "lax",
+    secure: isProduction,
     path: "/",
   });
 
