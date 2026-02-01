@@ -148,11 +148,11 @@ export const applicationFormSchema = z
   .refine(
     (data) => {
       // If HOME_OWNER selected, home photos are required (min 3)
-      // DEV MODE: Skip this check if no Cloudinary configured
-      const isDev = process.env.NODE_ENV === "development";
-      if (!isDev && data.roles.includes("HOME_OWNER") && (!data.homePhotos || data.homePhotos.length < 3)) {
-        return false;
-      }
+      // TEMPORARILY OPTIONAL: Skip photo requirement until Cloudinary is configured
+      // TODO: Re-enable once Cloudinary is set up in production
+      // if (data.roles.includes("HOME_OWNER") && (!data.homePhotos || data.homePhotos.length < 3)) {
+      //   return false;
+      // }
       return true;
     },
     {
