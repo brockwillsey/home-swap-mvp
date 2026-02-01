@@ -1,16 +1,22 @@
 /**
  * Payment tRPC Router
  *
- * Handles Stripe checkout session creation for membership payments.
+ * Handles Stripe checkout session creation for membership subscriptions.
  * Requires authentication - user must have a pending application.
+ *
+ * Subscription model:
+ * - 6-month billing cycle
+ * - Promo codes can provide free trial period
+ * - Auto-renews at end of period
  */
 
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
 import { createTRPCRouter, protectedProcedure, rateLimitedProtectedProcedure } from "~/server/api/trpc";
-import { stripe, isStripeConfigured, MEMBERSHIP_PRICE_CENTS, MEMBERSHIP_DESCRIPTION } from "~/lib/services/stripe";
+import { stripe, isStripeConfigured, MEMBERSHIP_DESCRIPTION } from "~/lib/services/stripe";
 import { env } from "~/env";
+import { calculateMembershipFee, type MembershipRoleType } from "~/lib/validations/application";
 
 export const paymentRouter = createTRPCRouter({
   /**
@@ -77,8 +83,13 @@ export const paymentRouter = createTRPCRouter({
     const successUrl = `${baseUrl}/apply/success?session_id={CHECKOUT_SESSION_ID}`;
     const cancelUrl = `${baseUrl}/apply/cancel`;
 
+    // Calculate price based on roles
+    const roles = JSON.parse(application.roles) as string[];
+    const membershipFee = calculateMembershipFee(roles as MembershipRoleType[]);
+    const priceInCents = membershipFee * 100; // Convert dollars to cents
+
     try {
-      // Create Stripe Checkout session
+      // Create Stripe Checkout session with subscription mode
       const session = await stripe.checkout.sessions.create({
         payment_method_types: ["card"],
         line_items: [
@@ -87,14 +98,18 @@ export const paymentRouter = createTRPCRouter({
               currency: "usd",
               product_data: {
                 name: MEMBERSHIP_DESCRIPTION,
-                description: "Annual membership to the Art Res home exchange community",
+                description: "6-month membership to the Art Res home exchange community. Auto-renews every 6 months.",
               },
-              unit_amount: MEMBERSHIP_PRICE_CENTS,
+              unit_amount: priceInCents,
+              recurring: {
+                interval: "month",
+                interval_count: 6, // Bill every 6 months
+              },
             },
             quantity: 1,
           },
         ],
-        mode: "payment",
+        mode: "subscription",
         success_url: successUrl,
         cancel_url: cancelUrl,
         customer_email: ctx.session.user.email ?? undefined,
@@ -102,7 +117,13 @@ export const paymentRouter = createTRPCRouter({
           applicationId: application.id,
           userId: ctx.session.user.id,
         },
-        // Allow promotion codes for future flexibility
+        subscription_data: {
+          metadata: {
+            applicationId: application.id,
+            userId: ctx.session.user.id,
+          },
+        },
+        // Allow promotion codes in Stripe Checkout
         allow_promotion_codes: true,
       });
 

@@ -93,8 +93,10 @@ model Application {
   profilePhotoUrl String?
   homePhotos    String            @default("[]") // JSON array of Cloudinary URLs
   membershipFee Int               @default(0)    // Fee amount in dollars
+  promoCode     String?           // Promo code used at signup
   feedback      String?           // Admin feedback for rejection
   stripePaymentId String?         // Stripe payment intent ID
+  stripeSubscriptionId String?    // Stripe subscription ID
   createdAt     DateTime          @default(now())
   updatedAt     DateTime          @updatedAt
   reviewedAt    DateTime?

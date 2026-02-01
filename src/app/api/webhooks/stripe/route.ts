@@ -1,10 +1,10 @@
 /**
  * Stripe Webhook Handler
  *
- * Handles Stripe webhook events for payment processing.
+ * Handles Stripe webhook events for subscription processing.
  * Events handled:
- * - checkout.session.completed: Update application status to SUBMITTED
- * - charge.refunded: Handle refund events for rejected applications
+ * - checkout.session.completed: Update application status to SUBMITTED (for subscriptions)
+ * - customer.subscription.deleted: Handle subscription cancellations
  *
  * Security:
  * - Verifies webhook signature to prevent spoofed events
@@ -88,6 +88,7 @@ export async function POST(req: Request) {
 /**
  * Handle successful checkout session completion
  * Updates application status and sends confirmation email
+ * Supports both one-time payments and subscriptions
  * Idempotent: skips if already processed to prevent duplicate emails on webhook retry
  */
 async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session) {
@@ -104,7 +105,7 @@ async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session) 
   // Check if already processed (idempotency)
   const existingApplication = await db.application.findUnique({
     where: { id: applicationId },
-    select: { status: true, stripePaymentId: true },
+    select: { status: true, stripePaymentId: true, stripeSubscriptionId: true },
   });
 
   if (!existingApplication) {
@@ -118,14 +119,22 @@ async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session) 
     return;
   }
 
+  // Get subscription ID for subscription mode, or payment intent for one-time
+  const subscriptionId = typeof session.subscription === "string"
+    ? session.subscription
+    : session.subscription?.id ?? null;
+
+  const paymentIntentId = typeof session.payment_intent === "string"
+    ? session.payment_intent
+    : session.payment_intent?.id ?? null;
+
   // Update application status to SUBMITTED
   const application = await db.application.update({
     where: { id: applicationId },
     data: {
       status: "SUBMITTED",
-      stripePaymentId: typeof session.payment_intent === "string"
-        ? session.payment_intent
-        : session.payment_intent?.id ?? null,
+      stripeSubscriptionId: subscriptionId,
+      stripePaymentId: paymentIntentId,
     },
     include: {
       user: {
@@ -139,6 +148,7 @@ async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session) 
 
   console.log(`Application ${applicationId} status updated to SUBMITTED`, {
     userId,
+    subscriptionId,
     paymentIntent: session.payment_intent,
   });
 

@@ -12,13 +12,14 @@ const isStripeConfigured = !!env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY;
 
 interface PaymentContentProps {
   userEmail?: string;
+  membershipFee?: number;
 }
 
 /**
  * Payment page client content
- * Handles Stripe checkout session creation and redirect
+ * Handles Stripe checkout session creation and redirect for subscriptions
  */
-export function PaymentContent({ userEmail }: PaymentContentProps) {
+export function PaymentContent({ userEmail, membershipFee = 300 }: PaymentContentProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -49,7 +50,7 @@ export function PaymentContent({ userEmail }: PaymentContentProps) {
       <CardHeader className="text-center">
         <CardTitle className="text-2xl">Complete Your Application</CardTitle>
         <CardDescription className="mt-2">
-          Final step: Pay the annual membership fee
+          Final step: Set up your membership subscription
         </CardDescription>
       </CardHeader>
 
@@ -58,11 +59,11 @@ export function PaymentContent({ userEmail }: PaymentContentProps) {
         <div className="rounded-lg bg-muted p-4">
           <h3 className="font-semibold text-foreground">Order Summary</h3>
           <div className="mt-3 flex items-center justify-between border-t pt-3">
-            <span className="text-muted-foreground">Art Res Annual Membership</span>
-            <span className="font-bold text-foreground">$300.00</span>
+            <span className="text-muted-foreground">Art Res Membership</span>
+            <span className="font-bold text-foreground">${membershipFee}.00 / 6 months</span>
           </div>
           <p className="mt-2 text-xs text-muted-foreground">
-            One-time payment. Membership valid for 12 months from approval.
+            Billed every 6 months. Cancel anytime. Have a promo code? Enter it at checkout.
           </p>
         </div>
 
@@ -132,9 +133,9 @@ export function PaymentContent({ userEmail }: PaymentContentProps) {
           </p>
         )}
 
-        {/* Refund policy note */}
+        {/* Subscription note */}
         <p className="text-center text-xs text-muted-foreground">
-          Full refund if your application is not approved.
+          Your subscription will auto-renew every 6 months. Cancel anytime from your account settings.
         </p>
       </CardContent>
     </Card>

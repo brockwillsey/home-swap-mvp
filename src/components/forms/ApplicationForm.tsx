@@ -57,6 +57,7 @@ export function ApplicationForm() {
       reasonForJoining: "",
       profilePhotoUrl: "",
       homePhotos: [],
+      promoCode: "",
     },
   });
 
@@ -198,7 +199,7 @@ export function ApplicationForm() {
                 <div className="flex items-center justify-between">
                   <span className="font-medium">Membership Fee:</span>
                   <span className="text-xl font-bold">
-                    {membershipFee === 0 ? "Free" : `$${membershipFee}/year`}
+                    {membershipFee === 0 ? "Free" : `$${membershipFee} / 6 months`}
                   </span>
                 </div>
                 <p className="mt-1 text-sm text-muted-foreground">
@@ -208,6 +209,11 @@ export function ApplicationForm() {
                     ? "Artist membership with residency access"
                     : "Sponsor membership - support our artist community"}
                 </p>
+                {membershipFee > 0 && (
+                  <p className="mt-2 text-xs text-muted-foreground">
+                    Billed every 6 months. Cancel anytime.
+                  </p>
+                )}
               </div>
             )}
 
@@ -414,6 +420,31 @@ export function ApplicationForm() {
               )}
             />
 
+            {/* Promo Code - Only show for paid memberships */}
+            {membershipFee > 0 && (
+              <FormField
+                control={form.control}
+                name="promoCode"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Promo Code</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder="Enter promo code (optional)"
+                        disabled={isSubmitting}
+                        {...field}
+                        className="uppercase"
+                      />
+                    </FormControl>
+                    <FormDescription>
+                      Have a promo code? Enter it here for a discount on your membership.
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            )}
+
             {/* Submit Button */}
             <Button
               type="submit"
@@ -435,7 +466,7 @@ export function ApplicationForm() {
             <p className="text-center text-xs text-muted-foreground">
               By submitting, you agree to our Terms of Service and Privacy Policy.
               {membershipFee > 0 && (
-                <> After submission, you&apos;ll complete the ${membershipFee} annual membership payment.</>
+                <> After submission, you&apos;ll set up your ${membershipFee}/6-month membership subscription.</>
               )}
             </p>
           </form>

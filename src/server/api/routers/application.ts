@@ -52,7 +52,7 @@ export const applicationRouter = createTRPCRouter({
   create: rateLimitedProcedure
     .input(applicationFormSchema)
     .mutation(async ({ ctx, input }) => {
-      const { roles, email, name, bio, location, portfolioUrl, studioGalleryReferral, reasonForJoining, profilePhotoUrl, homePhotos } = input;
+      const { roles, email, name, bio, location, portfolioUrl, studioGalleryReferral, reasonForJoining, profilePhotoUrl, homePhotos, promoCode } = input;
 
       // Calculate membership fee based on roles
       const membershipFee = calculateMembershipFee(roles as MembershipRoleType[]);
@@ -97,8 +97,10 @@ export const applicationRouter = createTRPCRouter({
                 profilePhotoUrl,
                 homePhotos: JSON.stringify(homePhotos ?? []),
                 membershipFee,
+                promoCode: promoCode || null,
                 feedback: null, // Clear previous feedback
                 stripePaymentId: null, // Clear previous payment ID for new application
+                stripeSubscriptionId: null, // Clear previous subscription ID
                 reviewedAt: null, // Clear previous review timestamp
                 reviewedBy: null, // Clear previous reviewer
               },
@@ -148,6 +150,7 @@ export const applicationRouter = createTRPCRouter({
               profilePhotoUrl,
               homePhotos: JSON.stringify(homePhotos ?? []),
               membershipFee,
+              promoCode: promoCode || null,
             },
           });
         });

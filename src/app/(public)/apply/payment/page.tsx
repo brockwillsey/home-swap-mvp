@@ -64,7 +64,10 @@ export default async function PaymentPage() {
           </div>
         }
       >
-        <PaymentContent userEmail={session.user.email ?? undefined} />
+        <PaymentContent
+          userEmail={session.user.email ?? undefined}
+          membershipFee={application.membershipFee}
+        />
       </Suspense>
 
       {/* Back link */}

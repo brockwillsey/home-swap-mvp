@@ -126,6 +126,11 @@ export const applicationFormSchema = z
     profilePhotoUrl: cloudinaryUrlSchema,
 
     homePhotos: homePhotosSchema,
+
+    promoCode: z
+      .string()
+      .transform((s) => s?.trim().toUpperCase() ?? "")
+      .optional(),
   })
   .refine(
     (data) => {
