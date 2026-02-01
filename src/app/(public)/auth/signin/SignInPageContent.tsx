@@ -151,11 +151,13 @@ export function SignInPageContent() {
               type="button"
               variant="outline"
               className="w-full"
-              disabled={isLoading || !form.watch("email")}
               onClick={() => {
-                const email = form.watch("email");
+                const emailInput = document.querySelector('input[type="email"]') as HTMLInputElement;
+                const email = emailInput?.value;
                 if (email) {
                   window.location.href = `/api/dev-login?email=${encodeURIComponent(email)}&callback=${encodeURIComponent(callbackUrl)}`;
+                } else {
+                  alert("Please enter your email first");
                 }
               }}
             >
