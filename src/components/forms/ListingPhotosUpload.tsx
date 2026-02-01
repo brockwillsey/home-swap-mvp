@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import Image from "next/image";
 import { CldUploadWidget, CldImage } from "next-cloudinary";
 import type { CloudinaryUploadWidgetResults } from "next-cloudinary";
@@ -211,6 +211,13 @@ export function ListingPhotosUpload({
   const [isUploading, setIsUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Use ref to always have the latest photos value in callbacks
+  // This prevents stale closure issues when multiple uploads fire rapidly
+  const photosRef = useRef(photos);
+  useEffect(() => {
+    photosRef.current = photos;
+  }, [photos]);
+
   // DnD sensors with keyboard support for accessibility
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -231,14 +238,18 @@ export function ListingPhotosUpload({
 
     if (results.info && typeof results.info !== "string") {
       const info = results.info as CloudinaryUploadInfo;
-      // Add new photo with unique ID
-      if (photos.length < maxPhotos) {
+      // Use ref to get the latest photos array to avoid stale closure issues
+      // when multiple uploads complete rapidly before React re-renders
+      const currentPhotos = photosRef.current;
+      if (currentPhotos.length < maxPhotos) {
         const newPhoto: ListingPhoto = {
           id: `photo-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
           url: info.secure_url,
           publicId: info.public_id,
         };
-        onChange([...photos, newPhoto]);
+        const updatedPhotos = [...currentPhotos, newPhoto];
+        photosRef.current = updatedPhotos; // Update ref immediately for next callback
+        onChange(updatedPhotos);
       }
     }
   }
