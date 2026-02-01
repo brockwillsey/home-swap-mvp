@@ -128,17 +128,20 @@ async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session) 
     ? session.payment_intent
     : session.payment_intent?.id ?? null;
 
-  // Update application status to SUBMITTED
+  // Update application status to APPROVED (auto-approve after payment)
+  // TODO: Change back to SUBMITTED when admin review is required
   const application = await db.application.update({
     where: { id: applicationId },
     data: {
-      status: "SUBMITTED",
+      status: "APPROVED",
       stripeSubscriptionId: subscriptionId,
       stripePaymentId: paymentIntentId,
+      reviewedAt: new Date(),
     },
     include: {
       user: {
         select: {
+          id: true,
           email: true,
           name: true,
         },
@@ -146,7 +149,18 @@ async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session) 
     },
   });
 
-  console.log(`Application ${applicationId} status updated to SUBMITTED`, {
+  // Sync application profile data to user record
+  await db.user.update({
+    where: { id: application.user.id },
+    data: {
+      bio: application.bio,
+      location: application.location,
+      creativeInterests: application.roles,
+      image: application.profilePhotoUrl,
+    },
+  });
+
+  console.log(`Application ${applicationId} auto-approved after payment`, {
     userId,
     subscriptionId,
     paymentIntent: session.payment_intent,
