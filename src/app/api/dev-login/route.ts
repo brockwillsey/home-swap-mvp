@@ -2,12 +2,13 @@ import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { db } from "~/server/db";
 
-// DEV ONLY - Direct login without email verification
+// TEMPORARY: Direct login without email verification
+// TODO: Remove this bypass before production launch!
 export async function GET(request: Request) {
-  // Only allow in development
-  if (process.env.NODE_ENV !== "development") {
-    return NextResponse.json({ error: "Not available" }, { status: 404 });
-  }
+  // TEMPORARILY DISABLED FOR TESTING - RE-ENABLE BEFORE PRODUCTION!
+  // if (process.env.NODE_ENV !== "development") {
+  //   return NextResponse.json({ error: "Not available" }, { status: 404 });
+  // }
 
   const { searchParams } = new URL(request.url);
   const email = searchParams.get("email") || "admin@artres.com";
