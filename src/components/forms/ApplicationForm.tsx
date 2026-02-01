@@ -213,16 +213,16 @@ export function ApplicationForm() {
                 </p>
                 {membershipFee > 0 && !hasValidPromoCode && (
                   <p className="mt-2 text-xs text-muted-foreground">
-                    Billed annually. Cancel anytime.
+                    Annual membership fee. Cancel anytime.
                   </p>
                 )}
                 {membershipFee > 0 && hasValidPromoCode && (
                   <div className="mt-2 rounded-md bg-green-500/10 p-2">
                     <p className="text-sm font-medium text-green-700 dark:text-green-400">
-                      6-month complimentary membership applied!
+                      6-month free trial applied!
                     </p>
                     <p className="text-xs text-green-600 dark:text-green-500">
-                      Your card will be saved but not charged until after 6 months. Renews at ${membershipFee}/year.
+                      Your card will be saved but not charged until after 6 months. Then renews at ${membershipFee}/year.
                     </p>
                   </div>
                 )}

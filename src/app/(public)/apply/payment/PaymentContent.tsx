@@ -66,15 +66,15 @@ export function PaymentContent({ userEmail, membershipFee = 300, hasPromoCode = 
           {hasPromoCode ? (
             <div className="mt-3 rounded-md bg-green-500/10 p-2">
               <p className="text-sm font-medium text-green-700 dark:text-green-400">
-                6-month complimentary membership applied!
+                6-month free trial applied!
               </p>
               <p className="text-xs text-green-600 dark:text-green-500">
-                Your card will be saved but not charged until after 6 months.
+                Your card will be saved but not charged until after 6 months. Then renews at ${membershipFee}/year.
               </p>
             </div>
           ) : (
             <p className="mt-2 text-xs text-muted-foreground">
-              Billed annually. Cancel anytime.
+              Annual membership fee. Cancel anytime.
             </p>
           )}
         </div>
@@ -148,8 +148,8 @@ export function PaymentContent({ userEmail, membershipFee = 300, hasPromoCode = 
         {/* Subscription note */}
         <p className="text-center text-xs text-muted-foreground">
           {hasPromoCode
-            ? "Your subscription will begin after the 6-month trial and renew annually. Cancel anytime."
-            : "Your subscription will auto-renew annually. Cancel anytime from your account settings."}
+            ? "After your 6-month free trial, your annual membership will begin. Cancel anytime."
+            : "Your annual membership will auto-renew each year. Cancel anytime from your account settings."}
         </p>
       </CardContent>
     </Card>
