@@ -20,6 +20,10 @@ const config = {
       },
     ],
   },
+  // Skip ESLint during production builds (run separately in CI)
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
 };
 
 export default config;
