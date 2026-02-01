@@ -110,8 +110,8 @@ export const paymentRouter = createTRPCRouter({
               product_data: {
                 name: MEMBERSHIP_DESCRIPTION,
                 description: hasPromoCode
-                  ? "Art Res yearly membership with 6-month complimentary trial. Your card will be charged after the trial period."
-                  : "Yearly membership to the Art Res home exchange community. Auto-renews annually.",
+                  ? "Enjoy 6 months of membership on us! Your yearly Musa Residency membership will renew 6 months from today."
+                  : "Yearly membership to the Musa Residency community. Auto-renews annually.",
               },
               unit_amount: priceInCents,
               recurring: {
