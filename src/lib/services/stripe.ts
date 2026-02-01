@@ -27,13 +27,32 @@ import Stripe from "stripe";
 import { env } from "~/env";
 
 /**
- * Stripe server-side client
+ * Stripe server-side client (lazy initialization)
  * Used for creating checkout sessions, handling webhooks, and refunds
+ * Only initialized when STRIPE_SECRET_KEY is available
  */
-export const stripe = new Stripe(env.STRIPE_SECRET_KEY ?? "", {
-  apiVersion: "2025-12-15.clover",
-  typescript: true,
-});
+let _stripe: Stripe | null = null;
+
+export function getStripe(): Stripe {
+  if (!_stripe) {
+    if (!env.STRIPE_SECRET_KEY) {
+      throw new Error("STRIPE_SECRET_KEY is not configured");
+    }
+    _stripe = new Stripe(env.STRIPE_SECRET_KEY, {
+      apiVersion: "2025-12-15.clover",
+      typescript: true,
+    });
+  }
+  return _stripe;
+}
+
+// For backwards compatibility - use getStripe() for new code
+export const stripe = env.STRIPE_SECRET_KEY
+  ? new Stripe(env.STRIPE_SECRET_KEY, {
+      apiVersion: "2025-12-15.clover",
+      typescript: true,
+    })
+  : (null as unknown as Stripe);
 
 /**
  * Check if Stripe is properly configured for server-side operations
