@@ -142,6 +142,27 @@ export function SignInPageContent() {
             </form>
           </Form>
 
+          {/* Test Login Button - TEMPORARY */}
+          <div className="mt-4 border-t pt-4">
+            <p className="mb-2 text-center text-xs text-muted-foreground">
+              Testing mode - skip email verification:
+            </p>
+            <Button
+              type="button"
+              variant="outline"
+              className="w-full"
+              disabled={isLoading || !form.watch("email")}
+              onClick={() => {
+                const email = form.watch("email");
+                if (email) {
+                  window.location.href = `/api/dev-login?email=${encodeURIComponent(email)}&callback=${encodeURIComponent(callbackUrl)}`;
+                }
+              }}
+            >
+              Test Login (Skip Email)
+            </Button>
+          </div>
+
           {/* Footer links */}
           <div className="mt-6 text-center text-sm text-muted-foreground">
             <p>

@@ -12,6 +12,7 @@ export async function GET(request: Request) {
 
   const { searchParams } = new URL(request.url);
   const email = searchParams.get("email") || "admin@artres.com";
+  const callback = searchParams.get("callback") || "/apply/payment";
 
   // Find or create user
   let user = await db.user.findUnique({ where: { email } });
@@ -42,6 +43,6 @@ export async function GET(request: Request) {
     path: "/",
   });
 
-  // Redirect to admin
-  return NextResponse.redirect(new URL("/admin", request.url));
+  // Redirect to callback URL
+  return NextResponse.redirect(new URL(callback, request.url));
 }
