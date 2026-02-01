@@ -111,7 +111,7 @@ export const paymentRouter = createTRPCRouter({
                 name: MEMBERSHIP_DESCRIPTION,
                 description: hasPromoCode
                   ? "Enjoy 6 months of membership on us! Your yearly Musa Residency membership will renew 6 months from today."
-                  : "Yearly membership to the Musa Residency community. Auto-renews annually.",
+                  : "Yearly membership to the Art Res home exchange community. Auto-renews annually.",
               },
               unit_amount: priceInCents,
               recurring: {
