@@ -13,13 +13,14 @@ const isStripeConfigured = !!env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY;
 interface PaymentContentProps {
   userEmail?: string;
   membershipFee?: number;
+  hasPromoCode?: boolean;
 }
 
 /**
  * Payment page client content
  * Handles Stripe checkout session creation and redirect for subscriptions
  */
-export function PaymentContent({ userEmail, membershipFee = 300 }: PaymentContentProps) {
+export function PaymentContent({ userEmail, membershipFee = 300, hasPromoCode = false }: PaymentContentProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -60,11 +61,22 @@ export function PaymentContent({ userEmail, membershipFee = 300 }: PaymentConten
           <h3 className="font-semibold text-foreground">Order Summary</h3>
           <div className="mt-3 flex items-center justify-between border-t pt-3">
             <span className="text-muted-foreground">Art Res Membership</span>
-            <span className="font-bold text-foreground">${membershipFee}.00 / 6 months</span>
+            <span className="font-bold text-foreground">${membershipFee}.00/year</span>
           </div>
-          <p className="mt-2 text-xs text-muted-foreground">
-            Billed every 6 months. Cancel anytime. Have a promo code? Enter it at checkout.
-          </p>
+          {hasPromoCode ? (
+            <div className="mt-3 rounded-md bg-green-500/10 p-2">
+              <p className="text-sm font-medium text-green-700 dark:text-green-400">
+                6-month complimentary membership applied!
+              </p>
+              <p className="text-xs text-green-600 dark:text-green-500">
+                Your card will be saved but not charged until after 6 months.
+              </p>
+            </div>
+          ) : (
+            <p className="mt-2 text-xs text-muted-foreground">
+              Billed annually. Cancel anytime.
+            </p>
+          )}
         </div>
 
         {/* What's included */}
@@ -135,7 +147,9 @@ export function PaymentContent({ userEmail, membershipFee = 300 }: PaymentConten
 
         {/* Subscription note */}
         <p className="text-center text-xs text-muted-foreground">
-          Your subscription will auto-renew every 6 months. Cancel anytime from your account settings.
+          {hasPromoCode
+            ? "Your subscription will begin after the 6-month trial and renew annually. Cancel anytime."
+            : "Your subscription will auto-renew annually. Cancel anytime from your account settings."}
         </p>
       </CardContent>
     </Card>

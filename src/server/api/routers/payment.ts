@@ -5,10 +5,13 @@
  * Requires authentication - user must have a pending application.
  *
  * Subscription model:
- * - 6-month billing cycle
- * - Promo codes can provide free trial period
+ * - Yearly billing cycle
+ * - Promo code MUSA-RES-6 provides 6-month free trial
  * - Auto-renews at end of period
  */
+
+// Valid promo code for 6-month free trial
+const VALID_PROMO_CODE = "MUSA-RES-6";
 
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
@@ -88,6 +91,14 @@ export const paymentRouter = createTRPCRouter({
     const membershipFee = calculateMembershipFee(roles as MembershipRoleType[]);
     const priceInCents = membershipFee * 100; // Convert dollars to cents
 
+    // Check if user has the valid promo code for 6-month free trial
+    const hasPromoCode = application.promoCode?.toUpperCase() === VALID_PROMO_CODE;
+
+    // Calculate trial end date (6 months from now) if promo code is valid
+    const trialEndDate = hasPromoCode
+      ? Math.floor(Date.now() / 1000) + (6 * 30 * 24 * 60 * 60) // ~6 months in seconds
+      : undefined;
+
     try {
       // Create Stripe Checkout session with subscription mode
       const session = await stripe.checkout.sessions.create({
@@ -98,12 +109,14 @@ export const paymentRouter = createTRPCRouter({
               currency: "usd",
               product_data: {
                 name: MEMBERSHIP_DESCRIPTION,
-                description: "6-month membership to the Art Res home exchange community. Auto-renews every 6 months.",
+                description: hasPromoCode
+                  ? "Art Res yearly membership with 6-month complimentary trial. Your card will be charged after the trial period."
+                  : "Yearly membership to the Art Res home exchange community. Auto-renews annually.",
               },
               unit_amount: priceInCents,
               recurring: {
-                interval: "month",
-                interval_count: 6, // Bill every 6 months
+                interval: "year",
+                interval_count: 1, // Bill yearly
               },
             },
             quantity: 1,
@@ -116,15 +129,16 @@ export const paymentRouter = createTRPCRouter({
         metadata: {
           applicationId: application.id,
           userId: ctx.session.user.id,
+          promoCode: application.promoCode ?? "",
         },
         subscription_data: {
           metadata: {
             applicationId: application.id,
             userId: ctx.session.user.id,
           },
+          // Add 6-month trial if promo code is valid
+          ...(trialEndDate && { trial_end: trialEndDate }),
         },
-        // Allow promotion codes in Stripe Checkout
-        allow_promotion_codes: true,
       });
 
       return {

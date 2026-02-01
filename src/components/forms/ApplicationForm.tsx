@@ -63,10 +63,12 @@ export function ApplicationForm() {
 
   // Watch roles to show/hide conditional fields and calculate fee
   const selectedRoles = useWatch({ control: form.control, name: "roles" }) as MembershipRoleType[];
+  const promoCode = useWatch({ control: form.control, name: "promoCode" }) as string;
   const isArtist = selectedRoles?.includes("ARTIST") ?? false;
   const isHomeOwner = selectedRoles?.includes("HOME_OWNER") ?? false;
   const isSponsorOnly = selectedRoles?.length === 1 && selectedRoles[0] === "SPONSOR";
   const membershipFee = calculateMembershipFee(selectedRoles ?? []);
+  const hasValidPromoCode = promoCode?.toUpperCase() === "MUSA-RES-6";
 
   const createApplication = api.application.create.useMutation({
     onSuccess: (data, variables) => {
@@ -199,7 +201,7 @@ export function ApplicationForm() {
                 <div className="flex items-center justify-between">
                   <span className="font-medium">Membership Fee:</span>
                   <span className="text-xl font-bold">
-                    {membershipFee === 0 ? "Free" : `$${membershipFee} / 6 months`}
+                    {membershipFee === 0 ? "Free" : `$${membershipFee}/year`}
                   </span>
                 </div>
                 <p className="mt-1 text-sm text-muted-foreground">
@@ -209,10 +211,20 @@ export function ApplicationForm() {
                     ? "Artist membership with residency access"
                     : "Sponsor membership - support our artist community"}
                 </p>
-                {membershipFee > 0 && (
+                {membershipFee > 0 && !hasValidPromoCode && (
                   <p className="mt-2 text-xs text-muted-foreground">
-                    Billed every 6 months. Cancel anytime.
+                    Billed annually. Cancel anytime.
                   </p>
+                )}
+                {membershipFee > 0 && hasValidPromoCode && (
+                  <div className="mt-2 rounded-md bg-green-500/10 p-2">
+                    <p className="text-sm font-medium text-green-700 dark:text-green-400">
+                      6-month complimentary membership applied!
+                    </p>
+                    <p className="text-xs text-green-600 dark:text-green-500">
+                      Your card will be saved but not charged until after 6 months. Renews at ${membershipFee}/year.
+                    </p>
+                  </div>
                 )}
               </div>
             )}
@@ -437,7 +449,7 @@ export function ApplicationForm() {
                       />
                     </FormControl>
                     <FormDescription>
-                      Have a promo code? Enter it here for a discount on your membership.
+                      Have a promo code? Enter it here for a complimentary trial period.
                     </FormDescription>
                     <FormMessage />
                   </FormItem>
@@ -465,8 +477,11 @@ export function ApplicationForm() {
             {/* Footer note */}
             <p className="text-center text-xs text-muted-foreground">
               By submitting, you agree to our Terms of Service and Privacy Policy.
-              {membershipFee > 0 && (
-                <> After submission, you&apos;ll set up your ${membershipFee}/6-month membership subscription.</>
+              {membershipFee > 0 && !hasValidPromoCode && (
+                <> After submission, you&apos;ll set up your ${membershipFee}/year membership subscription.</>
+              )}
+              {membershipFee > 0 && hasValidPromoCode && (
+                <> After submission, you&apos;ll enter your card details for your 6-month free trial.</>
               )}
             </p>
           </form>

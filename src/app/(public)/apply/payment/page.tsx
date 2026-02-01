@@ -45,6 +45,9 @@ export default async function PaymentPage() {
     redirect("/apply?status=needs-info");
   }
 
+  // Check if user has valid promo code for 6-month trial
+  const hasPromoCode = application.promoCode?.toUpperCase() === "MUSA-RES-6";
+
   return (
     <main className="flex min-h-screen flex-col items-center justify-center bg-background px-4 py-12">
       {/* Art Res Branding */}
@@ -67,6 +70,7 @@ export default async function PaymentPage() {
         <PaymentContent
           userEmail={session.user.email ?? undefined}
           membershipFee={application.membershipFee}
+          hasPromoCode={hasPromoCode}
         />
       </Suspense>
 
