@@ -42,9 +42,9 @@ export function HomePhotosUpload({
   // Check if Cloudinary is configured
   if (!isCloudinaryConfigured()) {
     return (
-      <div className="rounded-lg border border-dashed border-destructive/50 bg-destructive/5 p-6 text-center">
-        <p className="text-sm text-destructive">
-          Cloudinary is not configured. Please set NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME in your environment.
+      <div className="rounded-lg border border-dashed border-muted-foreground/30 bg-muted/50 p-6 text-center">
+        <p className="text-sm text-muted-foreground">
+          Photo upload is temporarily unavailable. You can continue without photos.
         </p>
       </div>
     );

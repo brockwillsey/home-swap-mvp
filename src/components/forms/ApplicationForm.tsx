@@ -223,7 +223,7 @@ export function ApplicationForm() {
               name="profilePhotoUrl"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Profile Photo *</FormLabel>
+                  <FormLabel>Profile Photo (optional)</FormLabel>
                   <FormControl>
                     <ProfilePhotoUpload
                       value={field.value}
@@ -357,7 +357,7 @@ export function ApplicationForm() {
                 name="homePhotos"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Your Home *</FormLabel>
+                    <FormLabel>Your Home (optional)</FormLabel>
                     <FormControl>
                       <HomePhotosUpload
                         value={field.value ?? []}
