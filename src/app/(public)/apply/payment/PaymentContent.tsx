@@ -87,6 +87,7 @@ export function PaymentContent({ userEmail, membershipFee = 300, hasPromoCode = 
             <li>Create unlimited home listings</li>
             <li>Connect with fellow creatives worldwide</li>
             <li>Points-based and swap exchanges</li>
+            <li>Fund projects and gain sponsorship</li>
           </ul>
         </div>
 
