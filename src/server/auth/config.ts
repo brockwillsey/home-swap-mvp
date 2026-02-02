@@ -43,9 +43,23 @@ export const authConfig = {
       from: DEFAULT_FROM_EMAIL,
       // Magic link expires after 10 minutes per AC #2/#3
       maxAge: 10 * 60,
-      // Custom branded email template
+      // Custom branded email template with intermediate page to prevent
+      // email security scanners from consuming the token
       async sendVerificationRequest({ identifier: email, url, provider }) {
-        const host = new URL(url).host;
+        const parsedUrl = new URL(url);
+        const host = parsedUrl.host;
+
+        // Extract token and callbackUrl from the original verification URL
+        const token = parsedUrl.searchParams.get("token");
+        const callbackUrl = parsedUrl.searchParams.get("callbackUrl") ?? "/dashboard";
+
+        // Create intermediate URL that requires user interaction
+        // This prevents email security scanners from consuming the token
+        const intermediateUrl = new URL("/auth/magic-link", parsedUrl.origin);
+        intermediateUrl.searchParams.set("token", token ?? "");
+        intermediateUrl.searchParams.set("email", email);
+        intermediateUrl.searchParams.set("callbackUrl", callbackUrl);
+        const magicLinkUrl = intermediateUrl.toString();
 
         // Dev mode: log magic link to console instead of sending email
         if (process.env.NODE_ENV === "development") {
@@ -53,7 +67,8 @@ export const authConfig = {
           console.log("🔐 DEV MODE - Magic Link Login");
           console.log("=".repeat(60));
           console.log(`Email: ${email}`);
-          console.log(`\n👉 Click here to sign in:\n${url}\n`);
+          console.log(`\n👉 Click here to sign in:\n${magicLinkUrl}\n`);
+          console.log(`\n📧 Original verification URL:\n${url}\n`);
           console.log("=".repeat(60) + "\n");
           return;
         }
@@ -68,8 +83,8 @@ export const authConfig = {
             from: provider.from ?? DEFAULT_FROM_EMAIL,
             to: email,
             subject: "Sign in to Art Res",
-            html: getMagicLinkEmailHtml(url, host),
-            text: getMagicLinkEmailText(url, host),
+            html: getMagicLinkEmailHtml(magicLinkUrl, host),
+            text: getMagicLinkEmailText(magicLinkUrl, host),
           });
 
           if (error) {
@@ -101,6 +116,4 @@ export const authConfig = {
   },
   // Trust the host header from Vercel
   trustHost: true,
-  // Enable debug mode for troubleshooting
-  debug: process.env.NODE_ENV === "production",
 } satisfies NextAuthConfig;
