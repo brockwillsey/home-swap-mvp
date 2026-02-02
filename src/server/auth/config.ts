@@ -101,4 +101,6 @@ export const authConfig = {
   },
   // Trust the host header from Vercel
   trustHost: true,
+  // Enable debug mode for troubleshooting
+  debug: process.env.NODE_ENV === "production",
 } satisfies NextAuthConfig;
