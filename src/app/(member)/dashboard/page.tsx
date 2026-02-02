@@ -50,6 +50,17 @@ export default async function DashboardPage() {
     ? await db.home.count({ where: { ownerId: session.user.id } })
     : 0;
 
+  // Get campaigns count and total raised
+  const campaigns = isApproved
+    ? await db.fund.findMany({
+        where: { creatorId: session.user.id },
+        select: { id: true, status: true, currentAmount: true },
+      })
+    : [];
+  const campaignCount = campaigns.length;
+  const activeCampaigns = campaigns.filter((c) => c.status === "ACTIVE").length;
+  const totalRaised = campaigns.reduce((sum, c) => sum + c.currentAmount, 0);
+
   return (
     <main className="min-h-screen bg-background">
       <MemberHeader activePage="dashboard" userName={userName} userPoints={userPoints} />
@@ -138,6 +149,42 @@ export default async function DashboardPage() {
               <CardHeader>
                 <CardTitle className="text-lg">My Listings</CardTitle>
                 <CardDescription>Share your space with the community</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-muted-foreground">
+                  Available after membership approval
+                </p>
+              </CardContent>
+            </Card>
+          )}
+
+          {isApproved ? (
+            <Link href="/funds/my" className="block">
+              <Card className="h-full transition-colors hover:border-primary/50">
+                <CardHeader>
+                  <CardTitle className="text-lg">My Campaigns</CardTitle>
+                  <CardDescription>
+                    {campaignCount === 0
+                      ? "Create a fundraising campaign"
+                      : `${activeCampaigns} active campaign${activeCampaigns !== 1 ? "s" : ""}`}
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm text-muted-foreground">
+                    {campaignCount === 0
+                      ? "Fund your creative projects"
+                      : totalRaised > 0
+                        ? `$${(totalRaised / 100).toLocaleString()} raised`
+                        : "Manage your campaigns"}
+                  </p>
+                </CardContent>
+              </Card>
+            </Link>
+          ) : (
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg">My Campaigns</CardTitle>
+                <CardDescription>Fund your creative projects</CardDescription>
               </CardHeader>
               <CardContent>
                 <p className="text-sm text-muted-foreground">
