@@ -99,4 +99,6 @@ export const authConfig = {
     verifyRequest: "/auth/verify",
     error: "/auth/error",
   },
+  // Trust the host header from Vercel
+  trustHost: true,
 } satisfies NextAuthConfig;
