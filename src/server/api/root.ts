@@ -1,6 +1,8 @@
 import { adminRouter } from "~/server/api/routers/admin";
 import { applicationRouter } from "~/server/api/routers/application";
 import { bookingRouter } from "~/server/api/routers/booking";
+import { donationRouter } from "~/server/api/routers/donation";
+import { fundRouter } from "~/server/api/routers/fund";
 import { listingRouter } from "~/server/api/routers/listing";
 import { messageRouter } from "~/server/api/routers/message";
 import { paymentRouter } from "~/server/api/routers/payment";
@@ -19,6 +21,8 @@ export const appRouter = createTRPCRouter({
   admin: adminRouter,
   application: applicationRouter,
   booking: bookingRouter,
+  donation: donationRouter,
+  fund: fundRouter,
   listing: listingRouter,
   message: messageRouter,
   payment: paymentRouter,

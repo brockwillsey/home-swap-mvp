@@ -78,6 +78,10 @@ model User {
   sentMessages     Message[] @relation("SentMessages")
   receivedMessages Message[] @relation("ReceivedMessages")
   pointTransactions PointTransaction[]
+
+  // Crowdfunding relations
+  fundsCreated     Fund[]      @relation("FundCreator")
+  donations        Donation[]  @relation("DonorDonations")
 }
 
 model Application {
@@ -122,6 +126,7 @@ model Home {
   owner        User           @relation(fields: [ownerId], references: [id], onDelete: Cascade)
   availability Availability[]
   reservations Reservation[]
+  funds        Fund[]
 }
 
 model Availability {
@@ -242,4 +247,68 @@ enum PointTransactionType {
   SPENT_BOOKING
   REFUND
   INITIAL_BONUS
+}
+
+// =============================================================================
+// Crowdfunding Models
+// =============================================================================
+
+model Fund {
+  id              String      @id @default(cuid())
+  creatorId       String
+  title           String
+  description     String
+  goalAmount      Int         // Goal in cents
+  currentAmount   Int         @default(0)
+  coverImage      String?     // Cloudinary URL
+  status          FundStatus  @default(DRAFT)
+
+  homeId          String?     // Optional link to listing
+
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+  publishedAt     DateTime?
+
+  creator         User        @relation("FundCreator", fields: [creatorId], references: [id], onDelete: Cascade)
+  home            Home?       @relation(fields: [homeId], references: [id], onDelete: SetNull)
+  donations       Donation[]
+
+  @@index([creatorId, status])
+  @@index([status, publishedAt])
+}
+
+model Donation {
+  id                    String         @id @default(cuid())
+  fundId                String
+  donorId               String?
+  amount                Int            // Amount in cents (before fees)
+  platformFee           Int            // 10% fee in cents
+  message               String?
+  isAnonymous           Boolean        @default(false)
+  stripePaymentIntentId String?        @unique
+  status                DonationStatus @default(PENDING)
+
+  createdAt             DateTime       @default(now())
+  completedAt           DateTime?
+
+  fund                  Fund           @relation(fields: [fundId], references: [id], onDelete: Cascade)
+  donor                 User?          @relation("DonorDonations", fields: [donorId], references: [id], onDelete: SetNull)
+
+  @@index([fundId, status])
+  @@index([donorId])
+}
+
+enum FundStatus {
+  DRAFT
+  ACTIVE
+  PAUSED
+  COMPLETED
+  CANCELLED
+}
+
+enum DonationStatus {
+  PENDING
+  COMPLETED
+  FAILED
+  REFUNDED
 }

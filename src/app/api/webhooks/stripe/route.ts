@@ -17,7 +17,7 @@ import type Stripe from "stripe";
 
 import { stripe, getStripeWebhookSecret } from "~/lib/services/stripe";
 import { db } from "~/server/db";
-import { sendApplicationConfirmationEmail, sendNewApplicationNotificationEmail } from "~/lib/services/resend";
+import { sendApplicationConfirmationEmail, sendNewApplicationNotificationEmail, sendDonationReceivedEmail, sendDonationReceiptEmail } from "~/lib/services/resend";
 import { env } from "~/env";
 
 export async function POST(req: Request) {
@@ -64,7 +64,13 @@ export async function POST(req: Request) {
   try {
     switch (event.type) {
       case "checkout.session.completed": {
-        await handleCheckoutSessionCompleted(event.data.object as Stripe.Checkout.Session);
+        const session = event.data.object as Stripe.Checkout.Session;
+        // Route based on metadata type
+        if (session.metadata?.type === "donation") {
+          await handleDonationCheckoutCompleted(session);
+        } else {
+          await handleCheckoutSessionCompleted(session);
+        }
         break;
       }
       case "charge.refunded": {
@@ -194,6 +200,124 @@ async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session) 
       console.log(`Admin notification sent to ${env.ADMIN_EMAIL}`);
     } catch (emailError) {
       console.error("Failed to send admin notification email:", emailError);
+    }
+  }
+}
+
+/**
+ * Handle donation checkout session completion
+ * Updates donation status and increments fund amount
+ */
+async function handleDonationCheckoutCompleted(session: Stripe.Checkout.Session) {
+  const donationId = session.metadata?.donationId;
+  const fundId = session.metadata?.fundId;
+
+  if (!donationId || !fundId) {
+    console.error("Donation checkout session missing required metadata", {
+      sessionId: session.id,
+      donationId,
+      fundId,
+    });
+    return;
+  }
+
+  // Get donation record with related data for emails
+  const donation = await db.donation.findUnique({
+    where: { id: donationId },
+    include: {
+      fund: {
+        select: {
+          id: true,
+          title: true,
+          creator: {
+            select: {
+              email: true,
+              name: true,
+            },
+          },
+        },
+      },
+      donor: {
+        select: {
+          email: true,
+          name: true,
+        },
+      },
+    },
+  });
+
+  if (!donation) {
+    console.error(`Donation ${donationId} not found`);
+    return;
+  }
+
+  // Check if already processed (idempotency)
+  if (donation.status === "COMPLETED") {
+    console.log(`Donation ${donationId} already completed, skipping`);
+    return;
+  }
+
+  // Get payment intent ID
+  const paymentIntentId = typeof session.payment_intent === "string"
+    ? session.payment_intent
+    : session.payment_intent?.id ?? null;
+
+  // Update donation to COMPLETED
+  await db.donation.update({
+    where: { id: donationId },
+    data: {
+      status: "COMPLETED",
+      completedAt: new Date(),
+      stripePaymentIntentId: paymentIntentId,
+    },
+  });
+
+  // Increment fund's current amount
+  await db.fund.update({
+    where: { id: fundId },
+    data: {
+      currentAmount: {
+        increment: donation.amount,
+      },
+    },
+  });
+
+  console.log(`Donation ${donationId} completed`, {
+    fundId,
+    amount: donation.amount,
+    platformFee: donation.platformFee,
+  });
+
+  // Send email notifications
+  if (donation.fund.creator.email) {
+    try {
+      await sendDonationReceivedEmail({
+        creatorEmail: donation.fund.creator.email,
+        creatorName: donation.fund.creator.name,
+        donorName: donation.donor?.name ?? null,
+        fundTitle: donation.fund.title,
+        amount: donation.amount,
+        message: donation.message,
+        isAnonymous: donation.isAnonymous,
+      });
+      console.log(`Donation received email sent to ${donation.fund.creator.email}`);
+    } catch (emailError) {
+      console.error("Failed to send donation received email:", emailError);
+    }
+  }
+
+  if (donation.donor?.email) {
+    try {
+      await sendDonationReceiptEmail({
+        donorEmail: donation.donor.email,
+        donorName: donation.donor.name,
+        fundTitle: donation.fund.title,
+        creatorName: donation.fund.creator.name,
+        amount: donation.amount,
+      });
+      console.log(`Donation receipt email sent to ${donation.donor.email}`);
+    } catch (emailError) {
+      console.error("Failed to send donation receipt email:", emailError);
     }
   }
 }

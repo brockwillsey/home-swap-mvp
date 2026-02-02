@@ -1034,3 +1034,174 @@ Don't worry - there are many other amazing homes to discover. Keep searching!
     console.error("Failed to send declined email:", error);
   }
 }
+
+// =============================================================================
+// Donation Emails
+// =============================================================================
+
+/**
+ * Send notification to fund creator when they receive a donation
+ */
+export async function sendDonationReceivedEmail({
+  creatorEmail,
+  creatorName,
+  donorName,
+  fundTitle,
+  amount,
+  message,
+  isAnonymous,
+}: {
+  creatorEmail: string;
+  creatorName: string | null;
+  donorName: string | null;
+  fundTitle: string;
+  amount: number; // in cents
+  message?: string | null;
+  isAnonymous: boolean;
+}): Promise<void> {
+  if (!resend) {
+    console.log("Resend not configured - skipping donation received email");
+    return;
+  }
+
+  const safeCreatorName = creatorName ?? "there";
+  const displayDonorName = isAnonymous ? "Anonymous" : (donorName ?? "A supporter");
+  const amountFormatted = `$${(amount / 100).toFixed(0)}`;
+
+  const { error } = await resend.emails.send({
+    from: DEFAULT_FROM_EMAIL,
+    to: creatorEmail,
+    subject: `New Donation to "${fundTitle}"`,
+    html: `
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"></head>
+<body style="background-color: #FAFAF9; font-family: 'Inter', sans-serif; margin: 0; padding: 40px 20px;">
+  <table style="max-width: 560px; margin: 0 auto; background: #fff; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+    <tr><td style="padding: 40px;">
+      <div style="text-align: center; margin-bottom: 32px;">
+        <h1 style="color: #2C5545; font-size: 28px; margin: 0;">Art Res</h1>
+      </div>
+      <div style="text-align: center; margin-bottom: 24px;">
+        <span style="font-size: 48px;">💝</span>
+      </div>
+      <h2 style="color: #1f2937; font-size: 24px; text-align: center; margin: 0 0 16px;">You received a donation!</h2>
+      <p style="color: #6b7280; font-size: 16px; text-align: center; margin: 0 0 24px;">
+        Hi ${escapeHtml(safeCreatorName)}, ${escapeHtml(displayDonorName)} just donated to your campaign.
+      </p>
+      <div style="background: #dcfce7; border-radius: 8px; padding: 20px; text-align: center; margin-bottom: 24px;">
+        <p style="margin: 0 0 8px; font-size: 14px; color: #166534;">Amount</p>
+        <p style="margin: 0; font-size: 32px; font-weight: bold; color: #166534;">${amountFormatted}</p>
+      </div>
+      <div style="background: #f3f4f6; border-radius: 8px; padding: 20px; margin-bottom: 24px;">
+        <p style="margin: 0 0 8px;"><strong>Campaign:</strong> ${escapeHtml(fundTitle)}</p>
+        <p style="margin: 0 0 8px;"><strong>From:</strong> ${escapeHtml(displayDonorName)}</p>
+        ${message ? `<p style="margin: 8px 0 0; font-style: italic; color: #6b7280;">"${escapeHtml(message)}"</p>` : ""}
+      </div>
+      <p style="color: #9ca3af; font-size: 12px; text-align: center;">
+        Note: A 10% platform fee has been deducted. Payouts are processed manually by our team.
+      </p>
+    </td></tr>
+  </table>
+</body>
+</html>
+`,
+    text: `You received a donation! - Art Res
+
+Hi ${safeCreatorName},
+
+${displayDonorName} just donated ${amountFormatted} to your campaign "${fundTitle}".
+
+${message ? `Message: "${message}"` : ""}
+
+Note: A 10% platform fee has been deducted. Payouts are processed manually by our team.
+`,
+  });
+
+  if (error) {
+    console.error("Failed to send donation received email:", error);
+  }
+}
+
+/**
+ * Send receipt to donor after successful donation
+ */
+export async function sendDonationReceiptEmail({
+  donorEmail,
+  donorName,
+  fundTitle,
+  creatorName,
+  amount,
+}: {
+  donorEmail: string;
+  donorName: string | null;
+  fundTitle: string;
+  creatorName: string | null;
+  amount: number; // in cents
+}): Promise<void> {
+  if (!resend) {
+    console.log("Resend not configured - skipping donation receipt email");
+    return;
+  }
+
+  const safeDonorName = donorName ?? "there";
+  const safeCreatorName = creatorName ?? "the campaign creator";
+  const amountFormatted = `$${(amount / 100).toFixed(0)}`;
+  const platformFee = `$${((amount * 0.1) / 100).toFixed(2)}`;
+  const creatorReceives = `$${((amount * 0.9) / 100).toFixed(2)}`;
+
+  const { error } = await resend.emails.send({
+    from: DEFAULT_FROM_EMAIL,
+    to: donorEmail,
+    subject: `Thank you for your donation to "${fundTitle}"`,
+    html: `
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"></head>
+<body style="background-color: #FAFAF9; font-family: 'Inter', sans-serif; margin: 0; padding: 40px 20px;">
+  <table style="max-width: 560px; margin: 0 auto; background: #fff; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+    <tr><td style="padding: 40px;">
+      <div style="text-align: center; margin-bottom: 32px;">
+        <h1 style="color: #2C5545; font-size: 28px; margin: 0;">Art Res</h1>
+      </div>
+      <div style="text-align: center; margin-bottom: 24px;">
+        <span style="font-size: 48px;">🙏</span>
+      </div>
+      <h2 style="color: #1f2937; font-size: 24px; text-align: center; margin: 0 0 16px;">Thank you for your support!</h2>
+      <p style="color: #6b7280; font-size: 16px; text-align: center; margin: 0 0 24px;">
+        Hi ${escapeHtml(safeDonorName)}, your donation has been received.
+      </p>
+      <div style="background: #f3f4f6; border-radius: 8px; padding: 20px; margin-bottom: 24px;">
+        <p style="margin: 0 0 12px;"><strong>Campaign:</strong> ${escapeHtml(fundTitle)}</p>
+        <p style="margin: 0 0 12px;"><strong>Creator:</strong> ${escapeHtml(safeCreatorName)}</p>
+        <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 12px 0;">
+        <p style="margin: 0 0 8px;"><strong>Your donation:</strong> ${amountFormatted}</p>
+        <p style="margin: 0 0 8px; color: #6b7280; font-size: 14px;">Platform fee (10%): ${platformFee}</p>
+        <p style="margin: 0; color: #166534;"><strong>Creator receives:</strong> ${creatorReceives}</p>
+      </div>
+      <p style="color: #6b7280; font-size: 14px; text-align: center;">
+        Thank you for supporting artists in our community!
+      </p>
+    </td></tr>
+  </table>
+</body>
+</html>
+`,
+    text: `Thank you for your donation! - Art Res
+
+Hi ${safeDonorName},
+
+Your donation to "${fundTitle}" by ${safeCreatorName} has been received.
+
+Your donation: ${amountFormatted}
+Platform fee (10%): ${platformFee}
+Creator receives: ${creatorReceives}
+
+Thank you for supporting artists in our community!
+`,
+  });
+
+  if (error) {
+    console.error("Failed to send donation receipt email:", error);
+  }
+}
