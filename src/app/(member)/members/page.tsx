@@ -64,7 +64,7 @@ export default async function MembersPage() {
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-foreground">Community Members</h1>
           <p className="mt-2 text-muted-foreground">
-            Browse profiles of fellow Art Res members
+            Browse profiles of fellow Musa Residency members
           </p>
         </div>
 

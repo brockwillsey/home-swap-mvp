@@ -51,7 +51,7 @@ export default async function NewListingPage() {
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-foreground">Add a Home</h1>
           <p className="mt-2 text-muted-foreground">
-            Share your home with the Art Res community
+            Share your home with the Musa Residency community
           </p>
         </div>
 

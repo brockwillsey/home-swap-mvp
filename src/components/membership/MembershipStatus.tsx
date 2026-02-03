@@ -124,7 +124,7 @@ export function MembershipStatus({
         <div className="flex items-center justify-between">
           <div>
             <CardTitle className="text-lg">Membership Status</CardTitle>
-            <CardDescription>Your Art Res membership details</CardDescription>
+            <CardDescription>Your Musa Residency membership details</CardDescription>
           </div>
           <span
             className={`inline-flex items-center rounded-full px-3 py-1 text-sm font-medium ${getStatusBadgeClass(status)}`}
@@ -165,7 +165,7 @@ export function MembershipStatus({
                   Your membership expires in {daysRemaining} days
                 </p>
                 <p className="mt-1 text-xs text-yellow-700 dark:text-yellow-300">
-                  Renew soon to keep your access to the Art Res community.
+                  Renew soon to keep your access to the Musa Residency community.
                 </p>
               </div>
             )}
@@ -177,7 +177,7 @@ export function MembershipStatus({
                   Your membership has expired
                 </p>
                 <p className="mt-1 text-xs text-red-700 dark:text-red-300">
-                  Renew your membership to continue accessing the Art Res community.
+                  Renew your membership to continue accessing the Musa Residency community.
                 </p>
               </div>
             )}

@@ -165,7 +165,7 @@ export function DonationForm({ fundId, fundTitle, creatorName }: DonationFormPro
         {/* Fee Notice */}
         <div className="rounded-lg bg-muted/50 p-3">
           <p className="text-xs text-muted-foreground">
-            A 10% platform fee helps maintain Art Res and support our community.
+            A 10% platform fee helps maintain Musa Residency and support our community.
             {finalAmount > 0 && (
               <>
                 {" "}

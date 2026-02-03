@@ -23,7 +23,7 @@ import { signInSchema, type SignInFormData } from "~/lib/validations/auth";
 /**
  * Sign-In Page Content
  *
- * Magic link authentication form for Art Res
+ * Magic link authentication form for Musa Residency
  * - Enter email address
  * - Receive magic link via Resend
  * - Redirects to /auth/verify after submission
@@ -80,9 +80,9 @@ export function SignInPageContent() {
     <main className="flex min-h-screen flex-col items-center justify-center bg-background px-4">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
-          {/* Art Res Branding */}
+          {/* Musa Residency Branding */}
           <Link href="/" className="mb-4 inline-block">
-            <h1 className="text-3xl font-bold text-primary">Art Res</h1>
+            <h1 className="text-3xl font-bold text-primary">Musa Residency</h1>
           </Link>
           <CardTitle className="text-2xl">Welcome back</CardTitle>
           <CardDescription>

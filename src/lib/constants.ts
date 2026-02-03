@@ -1,5 +1,5 @@
 /**
- * Art Res Application Constants
+ * Musa Residency Application Constants
  *
  * Per architecture: Constants should use UPPER_SNAKE_CASE
  */

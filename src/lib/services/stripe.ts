@@ -7,7 +7,7 @@
  * Setup Instructions:
  * 1. Create account at https://stripe.com
  * 2. Get API keys from Dashboard → Developers → API keys
- * 3. Create a Product: "Art Res Annual Membership"
+ * 3. Create a Product: "Musa Residency Annual Membership"
  * 4. Create a Price: $300.00 one-time payment
  * 5. Configure webhook endpoint: /api/webhooks/stripe
  *    - Events: checkout.session.completed, charge.refunded
@@ -78,7 +78,7 @@ export const MEMBERSHIP_PRICE_CENTS = 30000;
 /**
  * Membership description for Stripe checkout
  */
-export const MEMBERSHIP_DESCRIPTION = "Art Res Annual Membership";
+export const MEMBERSHIP_DESCRIPTION = "Musa Residency Annual Membership";
 
 /**
  * Get the Stripe Price ID from environment

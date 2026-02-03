@@ -79,7 +79,7 @@ export default async function DashboardPage() {
             Welcome back{userName ? `, ${userName}` : ""}!
           </h1>
           <p className="mt-2 text-muted-foreground">
-            Your Art Res dashboard
+            Your Musa Residency dashboard
           </p>
         </div>
 
@@ -118,7 +118,7 @@ export default async function DashboardPage() {
               </CardHeader>
               <CardContent>
                 <p className="text-sm text-muted-foreground">
-                  View profiles of other Art Res members
+                  View profiles of other Musa Residency members
                 </p>
               </CardContent>
             </Card>

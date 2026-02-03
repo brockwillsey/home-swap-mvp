@@ -57,7 +57,7 @@ function MagicLinkContent() {
         <Card className="w-full max-w-md">
           <CardHeader className="text-center">
             <Link href="/" className="mb-4 inline-block">
-              <h1 className="text-3xl font-bold text-primary">Art Res</h1>
+              <h1 className="text-3xl font-bold text-primary">Musa Residency</h1>
             </Link>
             <CardTitle className="text-2xl text-destructive">Invalid Link</CardTitle>
             <CardDescription className="mt-2">
@@ -79,7 +79,7 @@ function MagicLinkContent() {
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
           <Link href="/" className="mb-4 inline-block">
-            <h1 className="text-3xl font-bold text-primary">Art Res</h1>
+            <h1 className="text-3xl font-bold text-primary">Musa Residency</h1>
           </Link>
 
           {/* Success Icon */}
@@ -102,7 +102,7 @@ function MagicLinkContent() {
 
           <CardTitle className="text-2xl">Welcome back!</CardTitle>
           <CardDescription className="mt-2">
-            Click the button below to sign in to your Art Res account.
+            Click the button below to sign in to your Musa Residency account.
           </CardDescription>
         </CardHeader>
 
@@ -134,7 +134,7 @@ function MagicLinkContent() {
                 Signing in...
               </>
             ) : (
-              "Sign in to Art Res"
+              "Sign in to Musa Residency"
             )}
           </Button>
 

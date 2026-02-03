@@ -1,5 +1,5 @@
 /**
- * Custom React Hooks for Art Res
+ * Custom React Hooks for Musa Residency
  *
  * This directory contains custom hooks for the application.
  * Per architecture, hooks to be added as features are implemented:

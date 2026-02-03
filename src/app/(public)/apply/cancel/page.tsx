@@ -79,10 +79,10 @@ function CancelContent() {
 export default function ApplyCancelPage() {
   return (
     <main className="flex min-h-screen flex-col items-center justify-center bg-background px-4 py-12">
-      {/* Art Res Branding */}
+      {/* Musa Residency Branding */}
       <div className="mb-8 text-center">
         <Link href="/" className="inline-block">
-          <h1 className="text-4xl font-bold text-primary">Art Res</h1>
+          <h1 className="text-4xl font-bold text-primary">Musa Residency</h1>
         </Link>
       </div>
 

@@ -6,16 +6,16 @@ import { ApplicationForm } from "~/components/forms/ApplicationForm";
 /**
  * Membership Application Page
  *
- * Public page where visitors can apply to join Art Res.
+ * Public page where visitors can apply to join Musa Residency.
  * No authentication required.
  */
 export default function ApplyPage() {
   return (
     <main className="flex min-h-screen flex-col items-center justify-center bg-background px-4 py-12">
-      {/* Art Res Branding */}
+      {/* Musa Residency Branding */}
       <div className="mb-8 text-center">
         <Link href="/" className="inline-block">
-          <h1 className="text-4xl font-bold text-primary">Art Res</h1>
+          <h1 className="text-4xl font-bold text-primary">Musa Residency</h1>
         </Link>
         <p className="mt-2 text-muted-foreground">
           Home exchange for creative people

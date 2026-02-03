@@ -79,7 +79,7 @@ export default async function DonateSuccessPage({ searchParams }: DonateSuccessP
           {/* Receipt Note */}
           <div className="mb-6 rounded-lg bg-muted/50 p-4">
             <p className="text-sm text-muted-foreground">
-              You&apos;ll receive an email receipt shortly. A 10% platform fee helps maintain Art Res.
+              You&apos;ll receive an email receipt shortly. A 10% platform fee helps maintain Musa Residency.
             </p>
           </div>
 

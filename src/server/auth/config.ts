@@ -28,11 +28,11 @@ declare module "next-auth" {
 }
 
 /**
- * NextAuth.js configuration for Art Res
+ * NextAuth.js configuration for Musa Residency
  *
  * Magic Link authentication via Resend email provider
  * - 10 minute link expiration per acceptance criteria
- * - Art Res branded email template
+ * - Musa Residency branded email template
  *
  * @see https://authjs.dev/getting-started/providers/resend
  */
@@ -82,7 +82,7 @@ export const authConfig = {
           const { error } = await resend.emails.send({
             from: provider.from ?? DEFAULT_FROM_EMAIL,
             to: email,
-            subject: "Sign in to Art Res",
+            subject: "Sign in to Musa Residency",
             html: getMagicLinkEmailHtml(magicLinkUrl, host),
             text: getMagicLinkEmailText(magicLinkUrl, host),
           });

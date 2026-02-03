@@ -9,7 +9,7 @@ import { type Metadata } from "next";
 import { TRPCReactProvider } from "~/trpc/react";
 
 export const metadata: Metadata = {
-  title: "Art Res - Creative Home Exchange Community",
+  title: "Musa Residency - Creative Home Exchange Community",
   description:
     "A curated membership community for home exchange. Travel affordably, stay in beautiful homes, connect with fellow creatives.",
   icons: [{ rel: "icon", url: "/favicon.ico" }],

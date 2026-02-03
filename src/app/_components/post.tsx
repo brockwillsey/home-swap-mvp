@@ -3,7 +3,7 @@
 import { api } from "~/trpc/react";
 
 export function WelcomeMessage() {
-  const hello = api.post.hello.useQuery({ text: "Art Res Member" });
+  const hello = api.post.hello.useQuery({ text: "Musa Residency Member" });
 
   return (
     <div className="w-full max-w-xs text-center">

@@ -17,6 +17,6 @@ export const postRouter = createTRPCRouter({
     }),
 
   getSecretMessage: protectedProcedure.query(() => {
-    return "You are authenticated! Welcome to Art Res.";
+    return "You are authenticated! Welcome to Musa Residency.";
   }),
 });

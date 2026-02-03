@@ -5,7 +5,7 @@ import { SignInPageContent } from "./SignInPageContent";
 /**
  * Sign-In Page
  *
- * Magic link authentication form for Art Res
+ * Magic link authentication form for Musa Residency
  * Uses Suspense boundary for useSearchParams (Next.js 15 requirement)
  */
 export default function SignInPage() {

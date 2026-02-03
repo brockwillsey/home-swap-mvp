@@ -68,7 +68,7 @@ export const paymentRouter = createTRPCRouter({
       if (application.status === "APPROVED") {
         throw new TRPCError({
           code: "BAD_REQUEST",
-          message: "Your application has already been approved. Welcome to Art Res!",
+          message: "Your application has already been approved. Welcome to Musa Residency!",
         });
       }
       throw new TRPCError({

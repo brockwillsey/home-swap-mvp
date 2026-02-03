@@ -17,13 +17,13 @@ import { env } from "~/env";
 export const resend = env.RESEND_API_KEY ? new Resend(env.RESEND_API_KEY) : null;
 
 /**
- * Default sender address for Art Res emails
+ * Default sender address for Musa Residency emails
  * Note: In development, use onboarding@resend.dev or verify your own domain
  */
-export const DEFAULT_FROM_EMAIL = "Art Res <onboarding@resend.dev>";
+export const DEFAULT_FROM_EMAIL = "Musa Residency <onboarding@resend.dev>";
 
 /**
- * Art Res branded email template for magic link authentication
+ * Musa Residency branded email template for magic link authentication
  */
 export function getMagicLinkEmailHtml(url: string, host: string): string {
   const escapedHost = host.replace(/\./g, "&#8203;.");
@@ -34,7 +34,7 @@ export function getMagicLinkEmailHtml(url: string, host: string): string {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Sign in to Art Res</title>
+  <title>Sign in to Musa Residency</title>
 </head>
 <body style="background-color: #FAFAF9; font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; margin: 0; padding: 40px 20px;">
   <table role="presentation" style="max-width: 560px; margin: 0 auto; background-color: #ffffff; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);">
@@ -42,7 +42,7 @@ export function getMagicLinkEmailHtml(url: string, host: string): string {
       <td style="padding: 40px;">
         <!-- Logo/Header -->
         <div style="text-align: center; margin-bottom: 32px;">
-          <h1 style="color: #2C5545; font-size: 28px; font-weight: 700; margin: 0;">Art Res</h1>
+          <h1 style="color: #2C5545; font-size: 28px; font-weight: 700; margin: 0;">Musa Residency</h1>
           <p style="color: #6b7280; font-size: 14px; margin: 8px 0 0;">Creative Home Exchange Community</p>
         </div>
 
@@ -55,7 +55,7 @@ export function getMagicLinkEmailHtml(url: string, host: string): string {
 
           <!-- CTA Button -->
           <a href="${url}" style="display: inline-block; background-color: #2C5545; color: #ffffff; font-size: 16px; font-weight: 600; text-decoration: none; padding: 14px 32px; border-radius: 8px; margin-bottom: 24px;">
-            Sign in to Art Res
+            Sign in to Musa Residency
           </a>
 
           <p style="color: #9ca3af; font-size: 14px; margin: 24px 0 0;">
@@ -66,7 +66,7 @@ export function getMagicLinkEmailHtml(url: string, host: string): string {
         <!-- Footer -->
         <div style="border-top: 1px solid #e5e7eb; margin-top: 32px; padding-top: 24px; text-align: center;">
           <p style="color: #9ca3af; font-size: 12px; margin: 0;">
-            &copy; ${new Date().getFullYear()} Art Res. All rights reserved.
+            &copy; ${new Date().getFullYear()} Musa Residency. All rights reserved.
           </p>
         </div>
       </td>
@@ -81,7 +81,7 @@ export function getMagicLinkEmailHtml(url: string, host: string): string {
  * Plain text version of magic link email
  */
 export function getMagicLinkEmailText(url: string, host: string): string {
-  return `Sign in to Art Res (${host})\n\nClick here to sign in: ${url}\n\nThis link will expire in 10 minutes.\n\nIf you didn't request this email, you can safely ignore it.\n`;
+  return `Sign in to Musa Residency (${host})\n\nClick here to sign in: ${url}\n\nThis link will expire in 10 minutes.\n\nIf you didn't request this email, you can safely ignore it.\n`;
 }
 
 /**
@@ -102,7 +102,7 @@ export async function sendApplicationConfirmationEmail({
   const { error } = await resend.emails.send({
     from: DEFAULT_FROM_EMAIL,
     to: email,
-    subject: "Application Received - Art Res",
+    subject: "Application Received - Musa Residency",
     html: getApplicationConfirmationEmailHtml(name),
     text: getApplicationConfirmationEmailText(name),
   });
@@ -158,7 +158,7 @@ function getApplicationConfirmationEmailHtml(name: string): string {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Application Received - Art Res</title>
+  <title>Application Received - Musa Residency</title>
 </head>
 <body style="background-color: #FAFAF9; font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; margin: 0; padding: 40px 20px;">
   <table role="presentation" style="max-width: 560px; margin: 0 auto; background-color: #ffffff; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);">
@@ -166,7 +166,7 @@ function getApplicationConfirmationEmailHtml(name: string): string {
       <td style="padding: 40px;">
         <!-- Logo/Header -->
         <div style="text-align: center; margin-bottom: 32px;">
-          <h1 style="color: #2C5545; font-size: 28px; font-weight: 700; margin: 0;">Art Res</h1>
+          <h1 style="color: #2C5545; font-size: 28px; font-weight: 700; margin: 0;">Musa Residency</h1>
           <p style="color: #6b7280; font-size: 14px; margin: 8px 0 0;">Creative Home Exchange Community</p>
         </div>
 
@@ -183,7 +183,7 @@ function getApplicationConfirmationEmailHtml(name: string): string {
           </p>
 
           <p style="color: #6b7280; font-size: 16px; line-height: 1.5; margin: 0 0 24px;">
-            Thank you for applying to join the Art Res community! We've received your application and payment.
+            Thank you for applying to join the Musa Residency community! We've received your application and payment.
           </p>
 
           <!-- Status Box -->
@@ -210,7 +210,7 @@ function getApplicationConfirmationEmailHtml(name: string): string {
         <!-- Footer -->
         <div style="border-top: 1px solid #e5e7eb; margin-top: 32px; padding-top: 24px; text-align: center;">
           <p style="color: #9ca3af; font-size: 12px; margin: 0;">
-            &copy; ${new Date().getFullYear()} Art Res. All rights reserved.
+            &copy; ${new Date().getFullYear()} Musa Residency. All rights reserved.
           </p>
         </div>
       </td>
@@ -225,11 +225,11 @@ function getApplicationConfirmationEmailHtml(name: string): string {
  * Plain text version of application confirmation email
  */
 function getApplicationConfirmationEmailText(name: string): string {
-  return `Application Received - Art Res
+  return `Application Received - Musa Residency
 
 Hi ${name},
 
-Thank you for applying to join the Art Res community! We've received your application and payment.
+Thank you for applying to join the Musa Residency community! We've received your application and payment.
 
 Application Status: Under Review
 
@@ -240,7 +240,7 @@ What happens next?
 
 If you have any questions, please reply to this email.
 
-© ${new Date().getFullYear()} Art Res. All rights reserved.
+© ${new Date().getFullYear()} Musa Residency. All rights reserved.
 `;
 }
 
@@ -289,7 +289,7 @@ export async function sendNewApplicationNotificationEmail({
     <tr>
       <td style="padding: 40px;">
         <div style="text-align: center; margin-bottom: 32px;">
-          <h1 style="color: #2C5545; font-size: 28px; font-weight: 700; margin: 0;">Art Res</h1>
+          <h1 style="color: #2C5545; font-size: 28px; font-weight: 700; margin: 0;">Musa Residency</h1>
           <p style="color: #6b7280; font-size: 14px; margin: 8px 0 0;">Admin Notification</p>
         </div>
 
@@ -314,7 +314,7 @@ export async function sendNewApplicationNotificationEmail({
 
         <div style="border-top: 1px solid #e5e7eb; margin-top: 32px; padding-top: 24px; text-align: center;">
           <p style="color: #9ca3af; font-size: 12px; margin: 0;">
-            This is an automated admin notification from Art Res.
+            This is an automated admin notification from Musa Residency.
           </p>
         </div>
       </td>
@@ -323,7 +323,7 @@ export async function sendNewApplicationNotificationEmail({
 </body>
 </html>
 `,
-    text: `New Membership Application - Art Res
+    text: `New Membership Application - Musa Residency
 
 A new membership application has been submitted.
 
@@ -336,7 +336,7 @@ Membership Roles: ${roles}
 
 Review the application at: ${adminUrl}
 
-This is an automated admin notification from Art Res.
+This is an automated admin notification from Musa Residency.
 `,
   });
 
@@ -369,7 +369,7 @@ export async function sendWelcomeEmail({
   const { error } = await resend.emails.send({
     from: DEFAULT_FROM_EMAIL,
     to: email,
-    subject: "Welcome to Art Res! 🎉",
+    subject: "Welcome to Musa Residency! 🎉",
     html: getWelcomeEmailHtml(name, loginUrl),
     text: getWelcomeEmailText(name, loginUrl),
   });
@@ -391,7 +391,7 @@ function getWelcomeEmailHtml(name: string, loginUrl: string): string {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Welcome to Art Res!</title>
+  <title>Welcome to Musa Residency!</title>
 </head>
 <body style="background-color: #FAFAF9; font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; margin: 0; padding: 40px 20px;">
   <table role="presentation" style="max-width: 560px; margin: 0 auto; background-color: #ffffff; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);">
@@ -399,7 +399,7 @@ function getWelcomeEmailHtml(name: string, loginUrl: string): string {
       <td style="padding: 40px;">
         <!-- Logo/Header -->
         <div style="text-align: center; margin-bottom: 32px;">
-          <h1 style="color: #2C5545; font-size: 28px; font-weight: 700; margin: 0;">Art Res</h1>
+          <h1 style="color: #2C5545; font-size: 28px; font-weight: 700; margin: 0;">Musa Residency</h1>
           <p style="color: #6b7280; font-size: 14px; margin: 8px 0 0;">Creative Home Exchange Community</p>
         </div>
 
@@ -416,7 +416,7 @@ function getWelcomeEmailHtml(name: string, loginUrl: string): string {
           </p>
 
           <p style="color: #6b7280; font-size: 16px; line-height: 1.5; margin: 0 0 24px;">
-            Congratulations! Your application to join Art Res has been approved. You're now part of our curated community of creative professionals who share their homes with fellow members.
+            Congratulations! Your application to join Musa Residency has been approved. You're now part of our curated community of creative professionals who share their homes with fellow members.
           </p>
 
           <!-- CTA Button -->
@@ -437,14 +437,14 @@ function getWelcomeEmailHtml(name: string, loginUrl: string): string {
           </div>
 
           <p style="color: #9ca3af; font-size: 14px; margin: 24px 0 0;">
-            Welcome to Art Res. We're excited to have you!
+            Welcome to Musa Residency. We're excited to have you!
           </p>
         </div>
 
         <!-- Footer -->
         <div style="border-top: 1px solid #e5e7eb; margin-top: 32px; padding-top: 24px; text-align: center;">
           <p style="color: #9ca3af; font-size: 12px; margin: 0;">
-            &copy; ${new Date().getFullYear()} Art Res. All rights reserved.
+            &copy; ${new Date().getFullYear()} Musa Residency. All rights reserved.
           </p>
         </div>
       </td>
@@ -459,11 +459,11 @@ function getWelcomeEmailHtml(name: string, loginUrl: string): string {
  * Plain text version of welcome email
  */
 function getWelcomeEmailText(name: string, loginUrl: string): string {
-  return `Welcome to Art Res! 🎉
+  return `Welcome to Musa Residency! 🎉
 
 Hi ${name},
 
-Congratulations! Your application to join Art Res has been approved. You're now part of our curated community of creative professionals who share their homes with fellow members.
+Congratulations! Your application to join Musa Residency has been approved. You're now part of our curated community of creative professionals who share their homes with fellow members.
 
 Sign in to get started: ${loginUrl}
 
@@ -475,9 +475,9 @@ GETTING STARTED GUIDE
 3. Browse listings - Discover amazing homes from other artists and creatives
 4. Connect with members - Message other members to learn more about them
 
-Welcome to Art Res. We're excited to have you!
+Welcome to Musa Residency. We're excited to have you!
 
-© ${new Date().getFullYear()} Art Res. All rights reserved.
+© ${new Date().getFullYear()} Musa Residency. All rights reserved.
 `;
 }
 
@@ -503,7 +503,7 @@ export async function sendRejectionEmail({
   const { error } = await resend.emails.send({
     from: DEFAULT_FROM_EMAIL,
     to: email,
-    subject: "Art Res Application Update",
+    subject: "Musa Residency Application Update",
     html: getRejectionEmailHtml(name, feedback, refundProcessed),
     text: getRejectionEmailText(name, feedback, refundProcessed),
   });
@@ -526,7 +526,7 @@ function getRejectionEmailHtml(name: string, feedback: string, refundProcessed: 
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Art Res Application Update</title>
+  <title>Musa Residency Application Update</title>
 </head>
 <body style="background-color: #FAFAF9; font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; margin: 0; padding: 40px 20px;">
   <table role="presentation" style="max-width: 560px; margin: 0 auto; background-color: #ffffff; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);">
@@ -534,7 +534,7 @@ function getRejectionEmailHtml(name: string, feedback: string, refundProcessed: 
       <td style="padding: 40px;">
         <!-- Logo/Header -->
         <div style="text-align: center; margin-bottom: 32px;">
-          <h1 style="color: #2C5545; font-size: 28px; font-weight: 700; margin: 0;">Art Res</h1>
+          <h1 style="color: #2C5545; font-size: 28px; font-weight: 700; margin: 0;">Musa Residency</h1>
           <p style="color: #6b7280; font-size: 14px; margin: 8px 0 0;">Creative Home Exchange Community</p>
         </div>
 
@@ -547,7 +547,7 @@ function getRejectionEmailHtml(name: string, feedback: string, refundProcessed: 
           </p>
 
           <p style="color: #6b7280; font-size: 16px; line-height: 1.5; margin: 0 0 24px;">
-            Thank you for your interest in joining the Art Res community. After careful review, we're unable to approve your application at this time.
+            Thank you for your interest in joining the Musa Residency community. After careful review, we're unable to approve your application at this time.
           </p>
 
           <!-- Feedback Box -->
@@ -582,7 +582,7 @@ function getRejectionEmailHtml(name: string, feedback: string, refundProcessed: 
         <!-- Footer -->
         <div style="border-top: 1px solid #e5e7eb; margin-top: 32px; padding-top: 24px; text-align: center;">
           <p style="color: #9ca3af; font-size: 12px; margin: 0;">
-            &copy; ${new Date().getFullYear()} Art Res. All rights reserved.
+            &copy; ${new Date().getFullYear()} Musa Residency. All rights reserved.
           </p>
         </div>
       </td>
@@ -601,18 +601,18 @@ function getRejectionEmailText(name: string, feedback: string, refundProcessed: 
     ? "\nREFUND PROCESSED\nYour $300 membership fee has been refunded. Please allow 5-10 business days for the refund to appear on your statement.\n"
     : "\nIf you made a payment, our team will process your refund separately. Please contact us if you have questions.\n";
 
-  return `Art Res Application Update
+  return `Musa Residency Application Update
 
 Hi ${name},
 
-Thank you for your interest in joining the Art Res community. After careful review, we're unable to approve your application at this time.
+Thank you for your interest in joining the Musa Residency community. After careful review, we're unable to approve your application at this time.
 
 FEEDBACK FROM OUR TEAM:
 ${feedback}
 ${refundText}
 We appreciate your understanding. If you have any questions, please don't hesitate to reply to this email.
 
-© ${new Date().getFullYear()} Art Res. All rights reserved.
+© ${new Date().getFullYear()} Musa Residency. All rights reserved.
 `;
 }
 
@@ -638,7 +638,7 @@ export async function sendInfoRequestEmail({
   const { error } = await resend.emails.send({
     from: DEFAULT_FROM_EMAIL,
     to: email,
-    subject: "Art Res Application - Additional Information Needed",
+    subject: "Musa Residency Application - Additional Information Needed",
     html: getInfoRequestEmailHtml(name, requestedInfo, updateUrl),
     text: getInfoRequestEmailText(name, requestedInfo, updateUrl),
   });
@@ -662,7 +662,7 @@ function getInfoRequestEmailHtml(name: string, requestedInfo: string, updateUrl:
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Additional Information Needed - Art Res</title>
+  <title>Additional Information Needed - Musa Residency</title>
 </head>
 <body style="background-color: #FAFAF9; font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; margin: 0; padding: 40px 20px;">
   <table role="presentation" style="max-width: 560px; margin: 0 auto; background-color: #ffffff; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);">
@@ -670,7 +670,7 @@ function getInfoRequestEmailHtml(name: string, requestedInfo: string, updateUrl:
       <td style="padding: 40px;">
         <!-- Logo/Header -->
         <div style="text-align: center; margin-bottom: 32px;">
-          <h1 style="color: #2C5545; font-size: 28px; font-weight: 700; margin: 0;">Art Res</h1>
+          <h1 style="color: #2C5545; font-size: 28px; font-weight: 700; margin: 0;">Musa Residency</h1>
           <p style="color: #6b7280; font-size: 14px; margin: 8px 0 0;">Creative Home Exchange Community</p>
         </div>
 
@@ -683,7 +683,7 @@ function getInfoRequestEmailHtml(name: string, requestedInfo: string, updateUrl:
           </p>
 
           <p style="color: #6b7280; font-size: 16px; line-height: 1.5; margin: 0 0 24px;">
-            Thank you for applying to Art Res! We're reviewing your application and need a bit more information before we can make a decision.
+            Thank you for applying to Musa Residency! We're reviewing your application and need a bit more information before we can make a decision.
           </p>
 
           <!-- Request Box -->
@@ -707,7 +707,7 @@ function getInfoRequestEmailHtml(name: string, requestedInfo: string, updateUrl:
         <!-- Footer -->
         <div style="border-top: 1px solid #e5e7eb; margin-top: 32px; padding-top: 24px; text-align: center;">
           <p style="color: #9ca3af; font-size: 12px; margin: 0;">
-            &copy; ${new Date().getFullYear()} Art Res. All rights reserved.
+            &copy; ${new Date().getFullYear()} Musa Residency. All rights reserved.
           </p>
         </div>
       </td>
@@ -722,11 +722,11 @@ function getInfoRequestEmailHtml(name: string, requestedInfo: string, updateUrl:
  * Plain text version of info request email
  */
 function getInfoRequestEmailText(name: string, requestedInfo: string, updateUrl: string): string {
-  return `Additional Information Needed - Art Res
+  return `Additional Information Needed - Musa Residency
 
 Hi ${name},
 
-Thank you for applying to Art Res! We're reviewing your application and need a bit more information before we can make a decision.
+Thank you for applying to Musa Residency! We're reviewing your application and need a bit more information before we can make a decision.
 
 WHAT WE NEED:
 ${requestedInfo}
@@ -735,7 +735,7 @@ Update your application here: ${updateUrl}
 
 Once you've provided the information, we'll continue reviewing your application.
 
-© ${new Date().getFullYear()} Art Res. All rights reserved.
+© ${new Date().getFullYear()} Musa Residency. All rights reserved.
 `;
 }
 
@@ -790,7 +790,7 @@ export async function sendBookingRequestEmail({
     <tr>
       <td style="padding: 40px;">
         <div style="text-align: center; margin-bottom: 32px;">
-          <h1 style="color: #2C5545; font-size: 28px; font-weight: 700; margin: 0;">Art Res</h1>
+          <h1 style="color: #2C5545; font-size: 28px; font-weight: 700; margin: 0;">Musa Residency</h1>
         </div>
         <h2 style="color: #1f2937; font-size: 20px; font-weight: 600; margin: 0 0 16px;">New Booking Request!</h2>
         <p style="color: #6b7280; font-size: 16px; line-height: 1.5; margin: 0 0 24px;">
@@ -802,7 +802,7 @@ export async function sendBookingRequestEmail({
           <p style="margin: 0;"><strong>Type:</strong> ${bookingType === "POINTS" ? "Points Exchange" : "Home Swap"}</p>
         </div>
         <p style="color: #6b7280; font-size: 14px;">
-          Sign in to Art Res to review and respond to this request.
+          Sign in to Musa Residency to review and respond to this request.
         </p>
       </td>
     </tr>
@@ -810,7 +810,7 @@ export async function sendBookingRequestEmail({
 </body>
 </html>
 `,
-    text: `New Booking Request - Art Res
+    text: `New Booking Request - Musa Residency
 
 Hi ${safeHostName},
 
@@ -819,7 +819,7 @@ ${safeGuestName} wants to stay at ${listingTitle}.
 Dates: ${dateRange}
 Type: ${bookingType === "POINTS" ? "Points Exchange" : "Home Swap"}
 
-Sign in to Art Res to review and respond to this request.
+Sign in to Musa Residency to review and respond to this request.
 `,
   });
 
@@ -876,7 +876,7 @@ export async function sendBookingConfirmationEmail({
   <table style="max-width: 560px; margin: 0 auto; background: #fff; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
     <tr><td style="padding: 40px;">
       <div style="text-align: center; margin-bottom: 32px;">
-        <h1 style="color: #2C5545; font-size: 28px; margin: 0;">Art Res</h1>
+        <h1 style="color: #2C5545; font-size: 28px; margin: 0;">Musa Residency</h1>
       </div>
       <div style="text-align: center; margin-bottom: 24px;">
         <span style="font-size: 48px;">🎉</span>
@@ -897,7 +897,7 @@ export async function sendBookingConfirmationEmail({
 </body>
 </html>
 `,
-    text: `Booking Confirmed! - Art Res
+    text: `Booking Confirmed! - Musa Residency
 
 Hi ${safeGuestName},
 
@@ -925,7 +925,7 @@ Your host ${safeHostName} will be in touch with check-in details.
   <table style="max-width: 560px; margin: 0 auto; background: #fff; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
     <tr><td style="padding: 40px;">
       <div style="text-align: center; margin-bottom: 32px;">
-        <h1 style="color: #2C5545; font-size: 28px; margin: 0;">Art Res</h1>
+        <h1 style="color: #2C5545; font-size: 28px; margin: 0;">Musa Residency</h1>
       </div>
       <h2 style="color: #1f2937; font-size: 20px; margin: 0 0 16px;">You have a guest coming!</h2>
       <p style="color: #6b7280; font-size: 16px; margin: 0 0 24px;">
@@ -942,7 +942,7 @@ Your host ${safeHostName} will be in touch with check-in details.
 </body>
 </html>
 `,
-    text: `You have a guest coming! - Art Res
+    text: `You have a guest coming! - Musa Residency
 
 Hi ${safeHostName},
 
@@ -998,7 +998,7 @@ export async function sendBookingDeclinedEmail({
   <table style="max-width: 560px; margin: 0 auto; background: #fff; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
     <tr><td style="padding: 40px;">
       <div style="text-align: center; margin-bottom: 32px;">
-        <h1 style="color: #2C5545; font-size: 28px; margin: 0;">Art Res</h1>
+        <h1 style="color: #2C5545; font-size: 28px; margin: 0;">Musa Residency</h1>
       </div>
       <h2 style="color: #1f2937; font-size: 20px; margin: 0 0 16px;">Booking Request Declined</h2>
       <p style="color: #6b7280; font-size: 16px; margin: 0 0 24px;">
@@ -1018,7 +1018,7 @@ export async function sendBookingDeclinedEmail({
 </body>
 </html>
 `,
-    text: `Booking Request Declined - Art Res
+    text: `Booking Request Declined - Musa Residency
 
 Hi ${safeGuestName},
 
@@ -1080,7 +1080,7 @@ export async function sendDonationReceivedEmail({
   <table style="max-width: 560px; margin: 0 auto; background: #fff; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
     <tr><td style="padding: 40px;">
       <div style="text-align: center; margin-bottom: 32px;">
-        <h1 style="color: #2C5545; font-size: 28px; margin: 0;">Art Res</h1>
+        <h1 style="color: #2C5545; font-size: 28px; margin: 0;">Musa Residency</h1>
       </div>
       <div style="text-align: center; margin-bottom: 24px;">
         <span style="font-size: 48px;">💝</span>
@@ -1106,7 +1106,7 @@ export async function sendDonationReceivedEmail({
 </body>
 </html>
 `,
-    text: `You received a donation! - Art Res
+    text: `You received a donation! - Musa Residency
 
 Hi ${safeCreatorName},
 
@@ -1162,7 +1162,7 @@ export async function sendDonationReceiptEmail({
   <table style="max-width: 560px; margin: 0 auto; background: #fff; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
     <tr><td style="padding: 40px;">
       <div style="text-align: center; margin-bottom: 32px;">
-        <h1 style="color: #2C5545; font-size: 28px; margin: 0;">Art Res</h1>
+        <h1 style="color: #2C5545; font-size: 28px; margin: 0;">Musa Residency</h1>
       </div>
       <div style="text-align: center; margin-bottom: 24px;">
         <span style="font-size: 48px;">🙏</span>
@@ -1187,7 +1187,7 @@ export async function sendDonationReceiptEmail({
 </body>
 </html>
 `,
-    text: `Thank you for your donation! - Art Res
+    text: `Thank you for your donation! - Musa Residency
 
 Hi ${safeDonorName},
 

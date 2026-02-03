@@ -31,7 +31,7 @@ import { api } from "~/trpc/react";
 /**
  * Application Form Component
  *
- * Membership application form for Art Res with role-based pricing.
+ * Membership application form for Musa Residency with role-based pricing.
  * - Artist with home: $300
  * - Artist without home: $150
  * - Sponsor only: Free
@@ -103,7 +103,7 @@ export function ApplicationForm() {
   return (
     <Card className="w-full max-w-2xl">
       <CardHeader className="text-center">
-        <CardTitle className="text-2xl">Join Art Res</CardTitle>
+        <CardTitle className="text-2xl">Join Musa Residency</CardTitle>
         <CardDescription>
           Apply to become a member of our curated home exchange community for creatives.
         </CardDescription>
@@ -395,7 +395,7 @@ export function ApplicationForm() {
                   <FormLabel>Studio or Gallery Referral *</FormLabel>
                   <FormControl>
                     <Textarea
-                      placeholder="Is there a studio or gallery close to your place that might be interested in being part of the Art Res community? If so, please share their name and any contact information you have."
+                      placeholder="Is there a studio or gallery close to your place that might be interested in being part of the Musa Residency community? If so, please share their name and any contact information you have."
                       className="min-h-[100px] resize-y"
                       disabled={isSubmitting}
                       {...field}
@@ -415,7 +415,7 @@ export function ApplicationForm() {
               name="reasonForJoining"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Why do you want to join Art Res? *</FormLabel>
+                  <FormLabel>Why do you want to join Musa Residency? *</FormLabel>
                   <FormControl>
                     <Textarea
                       placeholder="What draws you to our community? How would you like to participate?"

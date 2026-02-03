@@ -143,7 +143,7 @@ function SuccessContent({
 
         <CardTitle className="text-2xl">Application Submitted!</CardTitle>
         <CardDescription className="mt-2">
-          Thank you for applying to join Art Res.
+          Thank you for applying to join Musa Residency.
         </CardDescription>
       </CardHeader>
 
@@ -179,7 +179,7 @@ function SuccessContent({
             <li>
               {isSponsorOnly
                 ? "If approved, you can start supporting artists immediately"
-                : "If approved, you can start using Art Res immediately"}
+                : "If approved, you can start using Musa Residency immediately"}
             </li>
           </ol>
         </div>
@@ -215,10 +215,10 @@ function SuccessContent({
 export default function ApplySuccessPage() {
   return (
     <main className="flex min-h-screen flex-col items-center justify-center bg-background px-4 py-12">
-      {/* Art Res Branding */}
+      {/* Musa Residency Branding */}
       <div className="mb-8 text-center">
         <Link href="/" className="inline-block">
-          <h1 className="text-4xl font-bold text-primary">Art Res</h1>
+          <h1 className="text-4xl font-bold text-primary">Musa Residency</h1>
         </Link>
       </div>
 

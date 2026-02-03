@@ -94,7 +94,7 @@ export const donationRouter = createTRPCRouter({
                 currency: "usd",
                 product_data: {
                   name: `Donation to "${fund.title}"`,
-                  description: `Support ${fund.creator.name ?? "this artist"}'s creative project. 10% platform fee helps maintain Art Res.`,
+                  description: `Support ${fund.creator.name ?? "this artist"}'s creative project. 10% platform fee helps maintain Musa Residency.`,
                 },
                 unit_amount: amount,
               },

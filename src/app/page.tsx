@@ -11,10 +11,10 @@ export default async function Home() {
     <HydrateClient>
       <main className="flex min-h-screen flex-col items-center justify-center bg-background">
         <div className="container flex flex-col items-center justify-center gap-12 px-4 py-16">
-          {/* Art Res Logo/Title */}
+          {/* Musa Residency Logo/Title */}
           <div className="text-center">
             <h1 className="text-5xl font-bold tracking-tight text-primary sm:text-6xl">
-              Art Res
+              Musa Residency
             </h1>
             <p className="mt-4 text-xl text-muted-foreground">
               Creative Home Exchange Community

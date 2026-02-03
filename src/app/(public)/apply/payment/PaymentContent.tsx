@@ -60,7 +60,7 @@ export function PaymentContent({ userEmail, membershipFee = 300, hasPromoCode = 
         <div className="rounded-lg bg-muted p-4">
           <h3 className="font-semibold text-foreground">Order Summary</h3>
           <div className="mt-3 flex items-center justify-between border-t pt-3">
-            <span className="text-muted-foreground">Art Res Membership</span>
+            <span className="text-muted-foreground">Musa Residency Membership</span>
             <span className="font-bold text-foreground">${membershipFee}.00/year</span>
           </div>
           {hasPromoCode ? (
@@ -83,7 +83,7 @@ export function PaymentContent({ userEmail, membershipFee = 300, hasPromoCode = 
         <div className="space-y-2 text-sm">
           <p className="font-medium">Membership includes:</p>
           <ul className="list-inside list-disc space-y-1 text-muted-foreground">
-            <li>Access to the Art Res home exchange network</li>
+            <li>Access to the Musa Residency home exchange network</li>
             <li>Create unlimited home listings</li>
             <li>Connect with fellow creatives worldwide</li>
             <li>Points-based and swap exchanges</li>

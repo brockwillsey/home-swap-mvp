@@ -233,7 +233,7 @@ export default async function MyListingsPage() {
                 No homes listed yet
               </h3>
               <p className="mb-6 text-center text-sm text-muted-foreground">
-                Share your first home with the Art Res community and start
+                Share your first home with the Musa Residency community and start
                 connecting with fellow artists.
               </p>
               <Button asChild>

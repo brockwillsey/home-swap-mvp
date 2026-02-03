@@ -83,7 +83,7 @@ export default async function NewFundPage() {
               </li>
             </ul>
             <p className="mt-4 text-xs text-muted-foreground">
-              Note: A 10% platform fee is deducted from donations to help maintain Art Res.
+              Note: A 10% platform fee is deducted from donations to help maintain Musa Residency.
               Funds are manually paid out by our team.
             </p>
           </CardContent>

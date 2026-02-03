@@ -15,7 +15,7 @@ export default function AdminMembersPage() {
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-foreground">Members</h1>
         <p className="mt-2 text-muted-foreground">
-          View and manage all Art Res members
+          View and manage all Musa Residency members
         </p>
       </div>
 

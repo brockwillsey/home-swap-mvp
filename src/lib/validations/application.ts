@@ -58,8 +58,8 @@ const homePhotosSchema = z
  * - bio: About the applicant (min 50 chars for quality, trimmed)
  * - location: Where they live (city/region, trimmed)
  * - portfolioUrl: Link to portfolio/work (required for artists)
- * - studioGalleryReferral: Info about nearby studios/galleries that might join Art Res
- * - reasonForJoining: Why they want to join Art Res (trimmed)
+ * - studioGalleryReferral: Info about nearby studios/galleries that might join Musa Residency
+ * - reasonForJoining: Why they want to join Musa Residency (trimmed)
  * - profilePhotoUrl: Cloudinary URL for profile photo (validated domain)
  * - homePhotos: Array of Cloudinary URLs for home photos (required for home owners)
  */

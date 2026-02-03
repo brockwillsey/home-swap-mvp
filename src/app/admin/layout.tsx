@@ -38,7 +38,7 @@ export default async function AdminLayout({
         <div className="container mx-auto flex items-center justify-between px-4 py-4">
           <div className="flex items-center gap-6">
             <Link href="/admin" className="text-2xl font-bold text-primary">
-              Art Res Admin
+              Musa Residency Admin
             </Link>
             <nav className="flex items-center gap-4">
               <Link

@@ -194,7 +194,7 @@ export function ProfileEditForm({ initialData }: ProfileEditFormProps) {
                     />
                   </FormControl>
                   <FormDescription>
-                    Art Res is a community for creatives. Share your artistic interests.
+                    Musa Residency is a community for creatives. Share your artistic interests.
                   </FormDescription>
                   <FormMessage />
                 </FormItem>

@@ -17,14 +17,14 @@ interface MemberHeaderProps {
 /**
  * Shared header component for member pages
  *
- * Displays the Art Res logo, navigation links, and sign out button.
+ * Displays the Musa Residency logo, navigation links, and sign out button.
  */
 export function MemberHeader({ userName, userPoints, unreadMessages, activePage }: MemberHeaderProps) {
   return (
     <header className="border-b bg-card">
       <div className="container mx-auto flex items-center justify-between px-4 py-4">
         <Link href="/" className="text-2xl font-bold text-primary">
-          Art Res
+          Musa Residency
         </Link>
         <div className="flex items-center gap-4">
           <Link

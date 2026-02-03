@@ -1,5 +1,5 @@
 /**
- * Zod Validation Schemas for Art Res
+ * Zod Validation Schemas for Musa Residency
  *
  * This directory contains all Zod schemas for validation.
  * Per architecture: "Use Zod schemas from `lib/validations/` - no inline schemas"
