@@ -294,16 +294,31 @@ export default async function FundPage({ params }: FundPageProps) {
 
             {/* Donation Form or Edit Button */}
             {isCreator ? (
-              <Card>
-                <CardContent className="pt-6">
-                  <p className="mb-4 text-sm text-muted-foreground">
-                    This is your campaign. You can edit or manage it from the edit page.
-                  </p>
-                  <Link href={`/funds/${id}/edit`}>
-                    <Button className="w-full">Edit Campaign</Button>
-                  </Link>
-                </CardContent>
-              </Card>
+              <div className="space-y-4">
+                <Card>
+                  <CardContent className="pt-6">
+                    <p className="mb-4 text-sm text-muted-foreground">
+                      This is your campaign. You can edit or manage it from the edit page.
+                    </p>
+                    <Link href={`/funds/${id}/edit`}>
+                      <Button className="w-full">Edit Campaign</Button>
+                    </Link>
+                  </CardContent>
+                </Card>
+                {/* Test donation form for creators */}
+                {fund.status === "ACTIVE" && (
+                  <div className="rounded-lg border border-dashed border-muted-foreground/50 p-4">
+                    <p className="mb-3 text-center text-xs font-medium text-muted-foreground">
+                      TEST MODE - Donate to your own campaign
+                    </p>
+                    <DonationForm
+                      fundId={fund.id}
+                      fundTitle={fund.title}
+                      creatorName={fund.creator.name}
+                    />
+                  </div>
+                )}
+              </div>
             ) : fund.status === "ACTIVE" ? (
               <DonationForm
                 fundId={fund.id}
